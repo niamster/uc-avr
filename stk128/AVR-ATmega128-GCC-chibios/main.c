@@ -1,6 +1,5 @@
 /*
-    ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010,
-                 2011 Giovanni Di Sirio.
+    ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010 Giovanni Di Sirio.
 
     This file is part of ChibiOS/RT.
 
@@ -22,30 +21,21 @@
 #include "hal.h"
 #include "evtimer.h"
 
-#include "lcd.h"
-
 static WORKING_AREA(waThread1, 32);
 static msg_t Thread1(void *arg) {
 
   while (TRUE) {
-    if (!(PINA & PORTA_BUTTON2))
-      PORTA ^= PORTA_RELAY;
     chThdSleepMilliseconds(1000);
   }
+
   return 0;
 }
 
 static void TimerHandler(eventid_t id) {
   msg_t TestThread(void *p);
-
-  if (!(PINA & PORTA_BUTTON1))
-    TestThread(&SD2);
 }
 
-/*
- * Application entry point.
- */
-int main(void) {
+int main(int argc, char **argv) {
   static EvTimer evt;
   static evhandler_t handlers[1] = {
     TimerHandler
@@ -53,28 +43,10 @@ int main(void) {
   static EventListener el0;
 
   /*
-   * System initializations.
-   * - HAL initialization, this also initializes the configured device drivers
-   *   and performs the board-specific initializations.
-   * - Kernel initialization, the main() function becomes a thread and the
-   *   RTOS is active.
+   * The main() function becomes a thread here then the interrupts are
+   * enabled and ChibiOS/RT goes live.
    */
-  halInit();
   chSysInit();
-
-  /*
-   * Activates the serial driver 2 using the driver default configuration.
-   */
-  sdStart(&SD2, NULL);
-
-  /*
-   * This initialization requires the OS already active because it uses delay
-   * APIs inside.
-   */
-  lcdInit();
-  lcdCmd(LCD_CLEAR);
-  lcdPuts(LCD_LINE1, "   ChibiOS/RT   ");
-  lcdPuts(LCD_LINE2, "  Hello World!  ");
 
   /*
    * Event Timer initialization.
@@ -84,7 +56,7 @@ int main(void) {
   chEvtRegister(&evt.et_es, &el0, 0);   /* Registers on the timer event source. */
 
   /*
-   * Starts the LED blinker thread.
+   * Starts thread.
    */
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
