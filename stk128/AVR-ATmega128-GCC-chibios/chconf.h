@@ -31,10 +31,6 @@
 #ifndef _CHCONF_H_
 #define _CHCONF_H_
 
-/*===========================================================================*/
-/* Kernel parameters.                                                        */
-/*===========================================================================*/
-
 /**
  * @brief   System tick frequency.
  * @details Frequency of the system timer that drives the system ticks. This
@@ -68,7 +64,7 @@
  *          You may use this option if you need to merge ChibiOS/RT with
  *          external libraries that require nested lock/unlock operations.
  *
- * @note T  he default is @p FALSE.
+ * @note    The default is @p FALSE.
  */
 #if !defined(CH_USE_NESTED_LOCKS) || defined(__DOXYGEN__)
 #define CH_USE_NESTED_LOCKS             FALSE
@@ -83,10 +79,27 @@
  *
  * @note    In order to let the OS manage the whole RAM the linker script must
  *          provide the @p __heap_base__ and @p __heap_end__ symbols.
- * @note    Requires @p CH_USE_COREMEM.
+ * @note    Requires @p CH_USE_MEMCORE.
  */
 #if !defined(CH_MEMCORE_SIZE) || defined(__DOXYGEN__)
 #define CH_MEMCORE_SIZE                 128
+#endif
+
+/**
+ * @brief   Idle thread automatic spawn suppression.
+ * @details When this option is activated the function @p chSysInit()
+ *          does not spawn the idle thread automatically. The application has
+ *          then the responsibility to do one of the following:
+ *          - Spawn a custom idle thread at priority @p IDLEPRIO.
+ *          - Change the main() thread priority to @p IDLEPRIO then enter
+ *            an endless loop. In this scenario the @p main() thread acts as
+ *            the idle thread.
+ *          .
+ * @note    Unless an idle thread is spawned the @p main() thread must not
+ *          enter a sleep state.
+ */
+#if !defined(CH_NO_IDLE_THREAD) || defined(__DOXYGEN__)
+#define CH_NO_IDLE_THREAD               FALSE
 #endif
 
 /*===========================================================================*/
@@ -103,26 +116,6 @@
  */
 #if !defined(CH_OPTIMIZE_SPEED) || defined(__DOXYGEN__)
 #define CH_OPTIMIZE_SPEED               TRUE
-#endif
-
-/**
- * @brief   Exotic optimization.
- * @details If defined then a CPU register is used as storage for the global
- *          @p currp variable. Caching this variable in a register greatly
- *          improves both space and time OS efficiency. A side effect is that
- *          one less register has to be saved during the context switch
- *          resulting in lower RAM usage and faster context switch.
- *
- * @note    This option is only usable with the GCC compiler and is only useful
- *          on processors with many registers like ARM cores.
- * @note    If this option is enabled then ALL the libraries linked to the
- *          ChibiOS/RT code <b>must</b> be recompiled with the GCC option @p
- *          -ffixed-@<reg@>.
- * @note    This option must be enabled in the Makefile, it is listed here for
- *          documentation only.
- */
-#if defined(__DOXYGEN__)
-#define CH_CURRP_REGISTER_CACHE         "reg"
 #endif
 
 /*===========================================================================*/
@@ -280,7 +273,6 @@
  * @details If enabled then the I/O queues APIs are included in the kernel.
  *
  * @note    The default is @p TRUE.
- * @note    Requires @p CH_USE_SEMAPHORES.
  */
 #if !defined(CH_USE_QUEUES) || defined(__DOXYGEN__)
 #define CH_USE_QUEUES                   TRUE
@@ -303,7 +295,7 @@
  *          in the kernel.
  *
  * @note    The default is @p TRUE.
- * @note    Requires @p CH_USE_COREMEM and either @p CH_USE_MUTEXES or
+ * @note    Requires @p CH_USE_MEMCORE and either @p CH_USE_MUTEXES or
  *          @p CH_USE_SEMAPHORES.
  * @note    Mutexes are recommended.
  */
@@ -318,7 +310,7 @@
  *
  * @note    The default is @p FALSE.
  * @note    Requires @p CH_USE_HEAP.
- * @note    The C-runtime may or may not require @p CH_USE_COREMEM, see the
+ * @note    The C-runtime may or may not require @p CH_USE_MEMCORE, see the
  *          appropriate documentation.
  */
 #if !defined(CH_USE_MALLOC_HEAP) || defined(__DOXYGEN__)
