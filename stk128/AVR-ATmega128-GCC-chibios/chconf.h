@@ -129,7 +129,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_REGISTRY) || defined(__DOXYGEN__)
-#define CH_USE_REGISTRY                 TRUE
+#define CH_USE_REGISTRY                 FALSE
 #endif
 
 /**
@@ -140,7 +140,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_WAITEXIT) || defined(__DOXYGEN__)
-#define CH_USE_WAITEXIT                 TRUE
+#define CH_USE_WAITEXIT                 FALSE
 #endif
 
 /**
@@ -150,7 +150,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_SEMAPHORES) || defined(__DOXYGEN__)
-#define CH_USE_SEMAPHORES               TRUE
+#define CH_USE_SEMAPHORES               FALSE
 #endif
 
 /**
@@ -174,7 +174,7 @@
  * @note    Requires @p CH_USE_SEMAPHORES.
  */
 #if !defined(CH_USE_SEMSW) || defined(__DOXYGEN__)
-#define CH_USE_SEMSW                    TRUE
+#define CH_USE_SEMSW                    FALSE
 #endif
 
 /**
@@ -184,7 +184,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_MUTEXES) || defined(__DOXYGEN__)
-#define CH_USE_MUTEXES                  TRUE
+#define CH_USE_MUTEXES                  FALSE
 #endif
 
 /**
@@ -196,7 +196,7 @@
  * @note    Requires @p CH_USE_MUTEXES.
  */
 #if !defined(CH_USE_CONDVARS) || defined(__DOXYGEN__)
-#define CH_USE_CONDVARS                 TRUE
+#define CH_USE_CONDVARS                 FALSE
 #endif
 
 /**
@@ -208,7 +208,7 @@
  * @note    Requires @p CH_USE_CONDVARS.
  */
 #if !defined(CH_USE_CONDVARS_TIMEOUT) || defined(__DOXYGEN__)
-#define CH_USE_CONDVARS_TIMEOUT         TRUE
+#define CH_USE_CONDVARS_TIMEOUT         FALSE
 #endif
 
 /**
@@ -230,7 +230,7 @@
  * @note    Requires @p CH_USE_EVENTS.
  */
 #if !defined(CH_USE_EVENTS_TIMEOUT) || defined(__DOXYGEN__)
-#define CH_USE_EVENTS_TIMEOUT           TRUE
+#define CH_USE_EVENTS_TIMEOUT           FALSE
 #endif
 
 /**
@@ -241,7 +241,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_MESSAGES) || defined(__DOXYGEN__)
-#define CH_USE_MESSAGES                 TRUE
+#define CH_USE_MESSAGES                 FALSE
 #endif
 
 /**
@@ -265,7 +265,7 @@
  * @note    Requires @p CH_USE_SEMAPHORES.
  */
 #if !defined(CH_USE_MAILBOXES) || defined(__DOXYGEN__)
-#define CH_USE_MAILBOXES                TRUE
+#define CH_USE_MAILBOXES                FALSE
 #endif
 
 /**
@@ -286,7 +286,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_MEMCORE) || defined(__DOXYGEN__)
-#define CH_USE_MEMCORE                  TRUE
+#define CH_USE_MEMCORE                  FALSE
 #endif
 
 /**
@@ -415,7 +415,7 @@
  *          some test cases into the test suite.
  */
 #if !defined(CH_DBG_THREADS_PROFILING) || defined(__DOXYGEN__)
-#define CH_DBG_THREADS_PROFILING        TRUE
+#define CH_DBG_THREADS_PROFILING        FALSE
 #endif
 
 /*===========================================================================*/

@@ -87,7 +87,7 @@ include $(CHIBIOS)/os/hal/platforms/AVR/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/AVR/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
-include $(CHIBIOS)/test/test.mk
+#include $(CHIBIOS)/test/test.mk
 
 VPATH = $(ROOT)/$(BOARD):$(CHIBIOS)/os/ports/GCC/AVR:$(CHIBIOS)/os/kernel/src:$(CHIBIOS)/os/hal/src:$(CHIBIOS)/os/hal/platforms/AVR:$(CHIBIOS)/os/various:$(CHIBIOS)/test:
 
