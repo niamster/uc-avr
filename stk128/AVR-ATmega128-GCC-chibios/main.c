@@ -21,18 +21,67 @@
 #include "hal.h"
 #include "evtimer.h"
 
+static void print(const char *msgp) {
+
+  while (*msgp)
+    chIOPut(&SD2, *msgp++);
+}
+
+static void println(const char *msgp) {
+    print(msgp);
+    chIOPut(&SD2, '\r');
+    chIOPut(&SD2, '\n');
+}
+
+void hello(void) {
+  println("");
+  println("*** ChibiOS/RT test suite");
+  println("***");
+  print("*** Kernel:       ");
+  println(CH_KERNEL_VERSION);
+#ifdef CH_COMPILER_NAME
+  print("*** Compiler:     ");
+  println(CH_COMPILER_NAME);
+#endif
+  print("*** Architecture: ");
+  println(CH_ARCHITECTURE_NAME);
+#ifdef CH_CORE_VARIANT_NAME
+  print("*** Core Variant: ");
+  println(CH_CORE_VARIANT_NAME);
+#endif
+#ifdef CH_PORT_INFO
+  print("*** Port Info:    ");
+  println(CH_PORT_INFO);
+#endif
+#ifdef PLATFORM_NAME
+  print("*** Platform:     ");
+  println(PLATFORM_NAME);
+#endif
+#ifdef BOARD_NAME
+  print("*** Test Board:   ");
+  println(BOARD_NAME);
+#endif
+  println("");
+}
+
 static WORKING_AREA(waThread1, 32);
 static msg_t Thread1(void *arg) {
 
   while (TRUE) {
     chThdSleepMilliseconds(1000);
+    LED_TOGGLE(0);
   }
 
   return 0;
 }
 
 static void TimerHandler(eventid_t id) {
-  msg_t TestThread(void *p);
+  /* msg_t TestThread(void *p); */
+
+  if (BTN_K1_PRESSED)
+      hello();
+    if (BTN_K2_PRESSED)
+        LED_TOGGLE(1);
 }
 
 int main(int argc, char **argv) {
@@ -43,10 +92,19 @@ int main(int argc, char **argv) {
   static EventListener el0;
 
   /*
-   * The main() function becomes a thread here then the interrupts are
-   * enabled and ChibiOS/RT goes live.
+   * System initializations.
+   * - HAL initialization, this also initializes the configured device drivers
+   *   and performs the board-specific initializations.
+   * - Kernel initialization, the main() function becomes a thread and the
+   *   RTOS is active.
    */
+  halInit();
   chSysInit();
+
+  /*
+   * Activates the serial driver 2 using the driver default configuration.
+   */
+  sdStart(&SD2, NULL);
 
   /*
    * Event Timer initialization.

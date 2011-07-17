@@ -21,12 +21,23 @@
 #include "hal.h"
 
 CH_IRQ_HANDLER(TIMER0_COMP_vect) {
-
   CH_IRQ_PROLOGUE();
 
   chSysLockFromIsr();
   chSysTimerHandlerI();
   chSysUnlockFromIsr();
+
+  CH_IRQ_EPILOGUE();
+}
+
+CH_IRQ_HANDLER(INT0_vect) {
+  CH_IRQ_PROLOGUE();
+
+  CH_IRQ_EPILOGUE();
+}
+
+CH_IRQ_HANDLER(INT1_vect) {
+  CH_IRQ_PROLOGUE();
 
   CH_IRQ_EPILOGUE();
 }
@@ -39,20 +50,20 @@ void boardInit(void) {
   /*
    * I/O ports setup.
    */
-  /* DDRA   = VAL_DDRA; */
-  /* PORTA  = VAL_PORTA; */
-  /* DDRB   = VAL_DDRB; */
-  /* PORTB  = VAL_PORTB; */
-  /* DDRC   = VAL_DDRC; */
-  /* PORTC  = VAL_PORTC; */
-  /* DDRD   = VAL_DDRD; */
-  /* PORTD  = VAL_PORTD; */
-  /* DDRE   = VAL_DDRE; */
-  /* PORTE  = VAL_PORTE; */
-  /* DDRF   = VAL_DDRF; */
-  /* PORTF  = VAL_PORTF; */
-  /* DDRG   = VAL_DDRG; */
-  /* PORTG  = VAL_PORTG; */
+  DDRA   = VAL_DDRA;
+  PORTA  = VAL_PORTA;
+  DDRB   = VAL_DDRB;
+  PORTB  = VAL_PORTB;
+  DDRC   = VAL_DDRC;
+  PORTC  = VAL_PORTC;
+  DDRD   = VAL_DDRD;
+  PORTD  = VAL_PORTD;
+  DDRE   = VAL_DDRE;
+  PORTE  = VAL_PORTE;
+  DDRF   = VAL_DDRF;
+  PORTF  = VAL_PORTF;
+  DDRG   = VAL_DDRG;
+  PORTG  = VAL_PORTG;
 
   /*
    * External interrupts setup, all disabled initially.
@@ -76,9 +87,4 @@ void boardInit(void) {
   TCNT0  = 0;                                           /* Reset counter.   */
   TIFR   = (1 << OCF0);                                 /* Reset pending.   */
   TIMSK  = (1 << OCIE0);                                /* IRQ on compare.  */
-
-  /*
-   * HAL initialization.
-   */
-  halInit();
 }

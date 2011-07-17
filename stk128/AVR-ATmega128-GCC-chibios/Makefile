@@ -63,7 +63,7 @@ BOARD = MEGA128D
 #         F_CPU = 16000000
 #         F_CPU = 18432000
 #         F_CPU = 20000000
-F_CPU = 16000000
+F_CPU = 7372800
 
 
 # Output format. (can be srec, ihex, binary)
@@ -597,6 +597,10 @@ clean_list:
 	@$(REMOVE) $(S:.c=.i)
 	@$(REMOVEDIR) .dep
 
+.PHONY: TAGS
+tags TAGS:
+	@rm -rf TAGS
+	@find $(ROOT) $(CHIBIOS) -name '*.[ch]' | xargs etags -a
 
 # Create object files directory
 $(shell mkdir $(OBJDIR) 2>/dev/null)

@@ -27,98 +27,120 @@
 /*
  * Board identifier.
  */
-#define BOARD_MEGA128D
-#define BOARD_NAME "MEGA128D"
+#define BOARD_NAME "STK128+"
 
-/*       PA7 RLY  DS  B5  B4  B3  B2  B1
- *        IN OUT  IN  IN  IN  IN  IN  IN
- * DDRA    0   1   0   0   0   0   0   0
- *        PU VAL HiZ HiZ HiZ HiZ HiZ HiZ
- * PORTA   1   0   0   0   0   0   0   0
+/*        PA7  PA6  PA5  PA4  PA3  PA2  PA1  PA0
+ *        IN   IN   IN   IN   IN   IN   IN   IN
+ * DDRA   0    0    0    0    0    0    0    0
+ *        PU   PU   PU   PU   PU   PU   PU   PU
+ * PORTA  1    1    1    1    1    1    1    1
  */
-#define VAL_DDRA  0x40
-#define VAL_PORTA 0x80
+#define VAL_DDRA  0x00
+#define VAL_PORTA 0xFF
 
-/*
- * All inputs with pullups.
+/*        PB7  PB6  PB5  PB4  K4   K3   K2  K1
+ *        IN   IN   IN   IN   IN   IN   IN   IN
+ * DDRB   0    0    0    0    0    0    0    0
+ *        PU   PU   PU   PU   PU   PU   PU   PU
+ * PORTB  1    1    1    1    1    1    1    1
  */
 #define VAL_DDRB  0x00
 #define VAL_PORTB 0xFF
 
-/*        D7  D6  D5  D4 PC3   E R/W  RS
- *        OUT OUT OUT OUT IN OUT OUT OUT
- * DDRC    1   1   1   1   0   1   1   1
- *        PU  PU  PU  PU  PU VAL VAL VAL
- * PORTC   0   0   0   0   1   0   0   0
+/*        PC7  PC6  PC5  PC4  K4   K3   K2  K1
+ *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  IN
+ * DDRC   1    1    1    1    1    1    1    1
+ *        VAL  VAL  VAL  VAL  VAL  VAL  VAL  VAL
+ * PORTC  1    1    1    1    1    1    1    1
  */
-#define VAL_DDRC  0xF7
-#define VAL_PORTC 0x08
+#define VAL_DDRC  0xFF
+#define VAL_PORTC 0xFF
 
-/*       PD7 PD6 PD5 PD4 TXD RXD PD1 PD0
- *        IN  IN  IN  IN OUT  IN  IN  IN
- * DDRD    0   0   0   0   1   0   0   0
- *        PU  PU  PU  PU VAL HiZ  PU  PU
- * PORTD   1   1   1   1   1   0   1   1
+/*        PD7  PD6  PD5  PD4  TXD  RXD  IT1  IT0
+ *        IN   IN   IN   IN   OUT  IN   x    x
+ * DDRD   0    0    0    0    1    0    0    0
+ *        PU   PU   PU   PU   VAL  HiZ  x    x
+ * PORTD  1    1    1    1    1    0    0    0
  */
 #define VAL_DDRD  0x08
-#define VAL_PORTD 0xFB
+#define VAL_PORTD 0xF8
 
-/*       PE7 PE6 BZ2 BZ2 PE3 PE2 PE1 PE0
- *        IN  IN OUT OUT  IN  IN OUT  IN
- * DDRE    0   0   1   1   0   0   1   0
- *        PU  PU VAL VAL  PU  PU VAL  PU
- * PORTE   1   1   1   1   1   1   1   1
+/*        PE7  PE6  PE5  PE4  PE3  PE2  PE1  PE0
+ *        IN   IN   IN   IN   IN   IN   IN   IN
+ * DDRE   0    0    0    0    0    0    0    0
+ *        PU   PU   PU   PU   PU   PU   PU   PU
+ * PORTE  1    1    1    1    1    1    1    1
  */
-#define VAL_DDRE  0x32
+#define VAL_DDRE  0x00
 #define VAL_PORTE 0xFF
 
-/*       TDI TDO TMS TCK PF3 PF2 PF1 PF0
- *         x   x   x   x  IN  IN  IN  IN
- * DDRF    0   0   0   0   0   0   0   0
- *         x   x   x   x  PU  PU  PU  PU
- * PORTF   0   0   0   0   1   1   1   1
- *
+/*        PF7  PF6  PF5  PF4  PF3  PF2  PF1  PF0
+ *        IN   IN   IN   IN   IN   IN   IN   IN
+ * DDRF   0    0    0    0    0    0    0    0
+ *        PU   PU   PU   PU   PU   PU   PU   PU
+ * PORTF  1    1    1    1    1    1    1    1
  */
 #define VAL_DDRF  0x00
-#define VAL_PORTF 0x0F
+#define VAL_PORTF 0xFF
 
-/*         x   x   x   x   x PG2 PG1 PG0
- *         x   x   x   x   x  IN  IN  IN
- * DDRG    0   0   0   0   0   0   0   0
- *         x   x   x   x   x  PU  PU  PU
- * PORTG   0   0   0   0   0   1   1   1
- *
+/*        x    x    x    x    PG3  PG2  PG1  PG0
+ *        x    x    x    x    IN   IN   IN   IN
+ * DDRG   0    0    0    0    0    0    0    0
+ *        x    x    x    x    PU   PU   PU   PU
+ * PORTG  0    0    0    0    1    1    1    1
  */
 #define VAL_DDRG  0x00
-#define VAL_PORTG 0x07
+#define VAL_PORTG 0x0F
 
-#define PORTA_BUTTON1           (1 << 0)
-#define PORTA_BUTTON2           (1 << 1)
-#define PORTA_BUTTON3           (1 << 2)
-#define PORTA_BUTTON4           (1 << 3)
-#define PORTA_BUTTON5           (1 << 4)
-#define PORTA_DALLAS            (1 << 5)
-#define PORTA_RELAY             (1 << 6)
+#define BTN_K1                   (1<<0)
+#define BTN_K2                   (1<<1)
+#define BTN_K3                   (1<<2)
+#define BTN_K4                   (1<<3)
 
-#define PORTC_44780_RS          (1 << 0)
-#define PORTC_44780_RW          (1 << 1)
-#define PORTC_44780_E           (1 << 2)
-#define PORTC_44780_D4          (1 << 4)
-#define PORTC_44780_D5          (1 << 5)
-#define PORTC_44780_D6          (1 << 6)
-#define PORTC_44780_D7          (1 << 7)
-#define PORTC_44780_DATA        (PORTC_44780_D4 | PORTC_44780_D5 | \
-                                 PORTC_44780_D6 | PORTC_44780_D7)
+#define BTN_K1_VAL               (PINB&BTN_K1)
+#define BTN_K2_VAL               (PINB&BTN_K2)
+#define BTN_K3_VAL               (PINB&BTN_K3)
+#define BTN_K4_VAL               (PINB&BTN_K4)
 
-#define PORTE_BUZZ1             (1 << 4)
-#define PORTE_BUZZ2             (1 << 5)
+#define BTN_K1_PRESSED           (!BTN_K1_VAL)
+#define BTN_K2_PRESSED           (!BTN_K2_VAL)
+#define BTN_K3_PRESSED           (!BTN_K3_VAL)
+#define BTN_K4_PRESSED           (!BTN_K4_VAL)
 
+#define LED1                     (1<<0)
+#define LED2                     (1<<1)
+#define LED3                     (1<<2)
+#define LED4                     (1<<3)
+#define LED5                     (1<<4)
+#define LED6                     (1<<5)
+#define LED7                     (1<<7)
+#define LED8                     (1<<7)
+
+#define LED_ON(led) do {                        \
+        PORTC &= ~(1 << (led));                 \
+    } while (0)
+
+#define LED_OFF(led) do {                       \
+        PORTC = 1 << (led);                     \
+    } while (0)
+
+#define LED_TOGGLE(led) do {                    \
+        PORTC ^= 1 << (led);                    \
+        /* PINC = 1 << (led); */                \
+    } while (0)
+
+#define SET_LED_MASK(mask) do {                 \
+        PORTC = ~(mask);                        \
+    } while (0)
+
+#if !defined(_FROM_ASM_)
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void hwinit(void);
+  void boardInit(void);
 #ifdef __cplusplus
 }
 #endif
+#endif /* _FROM_ASM_ */
 
 #endif /* _BOARD_H_ */
