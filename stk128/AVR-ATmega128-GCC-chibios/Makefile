@@ -43,7 +43,7 @@
 # MCU name
 MCU = atmega128
 
-BOARD = MEGA128D
+BOARD = STK128P
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the
