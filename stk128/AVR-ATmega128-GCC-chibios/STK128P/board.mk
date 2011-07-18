@@ -1,5 +1,5 @@
 # List of all the board related files.
-BOARDSRC = $(ROOT)/MEGA128D//board.c
+BOARDSRC = $(ROOT)/STK128P//board.c
 
 # Required include directories
-BOARDINC = $(ROOT)/MEGA128D/
+BOARDINC = $(ROOT)/STK128P/
