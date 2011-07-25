@@ -1,10 +1,11 @@
-#define F_CPU 16000000UL
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
 #include <string.h>
+
+#include "board.h"
+#include "uart.h"
 
 typedef unsigned char u8;
 typedef signed char s8;
@@ -68,6 +69,8 @@ led_cbk_t led_cbk[LED_CBK_QTY] = {
 
 volatile u8 cur_led_cbk = 0;
 
+u8 sym = ' ';
+
 ISR(INT0_vect, ISR_BLOCK)
 {
     u8 i;
@@ -77,6 +80,13 @@ ISR(INT0_vect, ISR_BLOCK)
         cur_led_cbk = 0;
 
     int_ack(0);
+
+    {
+        u8 buf[] = {sym++};
+        usart_write(buf, 1);
+        if (sym >= '~')
+            sym = ' ';
+    }
 }
 
 ISR(INT1_vect, ISR_BLOCK)
@@ -131,9 +141,32 @@ void enable_interrupt(u8 it, u8 sence)
     EIMSK |= 1 << it;
 }
 
+int board_setup(void)
+{
+    /*
+     * I/O ports setup.
+     */
+    DDRA   = VAL_DDRA;
+    PORTA  = VAL_PORTA;
+    DDRB   = VAL_DDRB;
+    PORTB  = VAL_PORTB;
+    DDRC   = VAL_DDRC;
+    PORTC  = VAL_PORTC;
+    DDRD   = VAL_DDRD;
+    PORTD  = VAL_PORTD;
+    DDRE   = VAL_DDRE;
+    PORTE  = VAL_PORTE;
+    DDRF   = VAL_DDRF;
+    PORTF  = VAL_PORTF;
+    DDRG   = VAL_DDRG;
+    PORTG  = VAL_PORTG;
+}
+
 int main(void)
 {
     u8 cnt;
+
+    board_setup();
 
     configure_leds(C);
     light_leds(C, 0x0);
@@ -141,16 +174,23 @@ int main(void)
     enable_interrupt(0, IT_RAISING_EDGE);
     enable_interrupt(1, IT_LEVEL);
 
+    usart_init(9600);
+
     sei();
 
     light_leds(C, 0x1);
+    {
+        u8 hw[] = "HELLO WORLD\n";
+        usart_write(hw, sizeof(hw)-1);
+    }
 
     for (;;) {
-        _delay_ms(1000);
         int_clear_ack(0);
         int_clear_ack(1);
 
         led_cbk[cur_led_cbk]();
+
+        _delay_ms(1000);
     }
 
     return 0;
