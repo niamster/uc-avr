@@ -1,5 +1,3 @@
-#define F_CPU 16000000UL
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -8,6 +6,14 @@
 
 typedef unsigned char u8;
 typedef signed char s8;
+
+#define configure_leds(port) do {               \
+        DDR##port = 0xFF;                       \
+    } while (0)
+
+#define light_leds(port, leds) do {                  \
+        PORT##port = (~leds)&0xFF;                   \
+    } while (0)
 
 /* PORTA[0] = busy */
 /* PORTA[1] = clk */
@@ -40,7 +46,8 @@ void lcd_putb(u8 c)
 }
 
 #define lcd_clr() lcd_putb(0x61)
-#define lcd_goto(a) lcd_putb(0x40|((a)&0x1f))
+#define lcd_ver() lcd_putb(0x60)
+#define lcd_goto(row, col) do { lcd_putb(0x40|(row)); lcd_putb(col); } while (0)
 
 void lcd_putc(u8 c)
 {
@@ -63,11 +70,24 @@ void lcd_puts(u8 *s)
 
 int main(void)
 {
+    configure_leds(C);
+    light_leds(C, 0x0);
 
     lcd_init();
-    lcd_puts("HELLO WORLD");
+
+    lcd_clr();
+
+    lcd_goto(0, 0);
+    lcd_ver();
+    lcd_goto(1, 0);
+    lcd_puts("Hello, world ...");
+    lcd_goto(2, 0);
+    lcd_puts("Leds are blinking");
 
     for (;;) {
+        light_leds(C, 0xFF);
+        _delay_ms(1000);
+        light_leds(C, 0x00);
         _delay_ms(1000);
     }
 
