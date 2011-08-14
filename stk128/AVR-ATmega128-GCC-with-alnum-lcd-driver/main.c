@@ -29,34 +29,50 @@ void irq_restore(u8 flags)
         PORT##port = (~leds)&0xFF;                   \
     } while (0)
 
-/* PORTA[0] = busy */
-/* PORTA[1] = clk */
-/* PORTA[2] = data */
+/* PORTD[2] = busy [interrupt] */
+/* PORTA[1] = clk  [out] */
+/* PORTA[2] = data [out] */
 
 void lcd_init(void)
 {
+    /* Setup clk and data pins */
     DDRA |= 0x6;
-    DDRA &= ~0x1;
-
     PORTA &= ~0x6;
 
-    /* OC1A/OC1B disconnected */
-    TCCR1A = 0;
-#if 0
-    /* CTC mode, top in OCR1A / Timer clock = CLK/1024 */
-    TCCR1B = (1<<WGM12)|(1<<CS12);
-    /* set OCR1A top value for 7KHz (7000/2 periods in one second) */
-    /*   0x01 for CPU @ 7.3728MHz (7372800/1024)/7000 */
-    OCR1A = 0x01;
-#else
-    /* CTC mode, top in OCR1A / Timer clock = CLK */
-    TCCR1B = (1<<WGM12);
-    /* set OCR1A top value for 1MHz (1,000,000/2 periods in one second) */
-    /*   0x1CCD for CPU @ 7.3728MHz 7372800/1000 */
-    OCR1A = 0x1CCD;
-#endif
-    /* enable Timer/Counter 1 interrupt */
-    TIMSK |= (1<<OCIE1A);
+    /* Setup busy pin */
+    DDRA &= ~0x1;
+
+    /* Setup INT2 */
+    EICRA &= ~(3 << 2);
+}
+
+static inline void lcd_enable_interrupt(void)
+{
+    EIMSK |= 1 << 2;
+}
+
+static inline void lcd_disable_interrupt(void)
+{
+    EIMSK &= ~(1 << 2);
+}
+
+static inline u8 lcd_busy(void)
+{
+    return PIND&4;
+}
+
+static inline void set_bit(u8 bit)
+{
+    if (bit)
+        PORTA |= 1<<2;
+    else
+        PORTA &= ~(1<<2);
+}
+
+static inline void push_bit(void)
+{
+    PORTA |= 1<<1;
+    PORTA &= ~(1<<1);
 }
 
 #define LCD_CMD_FIFO_LEN 256
@@ -75,28 +91,20 @@ void lcd_process_cmd_nolock(u8 max)
 
     while (max--) {
         if (lcd_cmd_fifo_rd == lcd_cmd_fifo_wr) {
-            /* Disable timer */
-            TCCR1B &= ~(1<<CS10);
+            lcd_disable_interrupt();
             return;
         }
 
-        if (PINA&1)
+        if (lcd_busy())
             return;
-
-        /* ASSERT(lcd_cmd_fifo_rd != lcd_cmd_fifo_wr); */
 
         curr = lcd_cmd_fifo_rd;
         cmd = lcd_cmd_fifo[curr];
         lcd_cmd_fifo_rd = (curr + 1)&LCD_CMD_FIFO_MSK;
 
         for (i=7;i>=0;--i) {
-            if ((cmd>>i)&0x1)
-                PORTA |= 1<<2;
-            else
-                PORTA &= ~(1<<2);
-
-            PORTA |= 1<<1;
-            PORTA &= ~(1<<1);
+            set_bit((cmd>>i)&0x1);
+            push_bit();
         }
     }
 }
@@ -112,7 +120,7 @@ void lcd_process_cmd(u8 max)
     irq_restore(flags);
 }
 
-ISR(TIMER1_COMPA_vect, ISR_BLOCK)
+ISR(INT2_vect, ISR_BLOCK)
 {
     lcd_process_cmd_nolock((u8)~0);
 }
@@ -134,8 +142,7 @@ void lcd_push_cmd_nolock(u8 c)
 
     lcd_cmd_fifo_wr = next;
 
-    /* Enable timer */
-    TCCR1B |= (1<<CS10);
+    lcd_enable_interrupt();
 }
 
 #define lcd_clr() do { u8 flags = irq_save(); lcd_push_cmd_nolock(0x61); irq_restore(flags); } while (0)
