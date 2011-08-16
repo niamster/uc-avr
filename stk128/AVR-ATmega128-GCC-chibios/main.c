@@ -93,6 +93,12 @@ static void cmd_mem(BaseChannel *chp, int argc, char *argv[]) {
 #if CH_USE_HEAP
     size_t n, size;
 #endif
+  extern uint8_t __heap_base__[];
+  extern uint8_t __heap_end__[];
+  extern uint8_t __data_start[];
+  extern uint8_t __data_end[];
+  extern uint8_t __bss_start[];
+  extern uint8_t __bss_end[];
 
     (void)argv;
 #if CH_USE_HEAP
@@ -109,6 +115,17 @@ static void cmd_mem(BaseChannel *chp, int argc, char *argv[]) {
 #if CH_USE_MEMCORE
     chprintf(chp, "core free memory : %u bytes\r\n", chCoreStatus());
 #endif
+    chprintf(chp, "data: %.8x:%.8x(%d bytes)\r\n",
+            (uint16_t)(uint8_t *)__data_start, (uint16_t)(uint8_t *)__data_end, (uint16_t)(uint8_t *)__data_end - (uint16_t)(uint8_t *)__data_start);
+    chprintf(chp, "bss : %.8x:%.8x(%d bytes)\r\n",
+            (uint16_t)(uint8_t *)__bss_start, (uint16_t)(uint8_t *)__bss_end, (uint16_t)(uint8_t *)__bss_end - (uint16_t)(uint8_t *)__bss_start);
+    chprintf(chp, "heap: %.8x:%.8x(%d bytes)\r\n",
+            (uint16_t)(uint8_t *)__heap_base__, (uint16_t)(uint8_t *)__heap_end__, (uint16_t)(uint8_t *)__heap_end__ - (uint16_t)(uint8_t *)__heap_base__);
+
+    chprintf(chp, "total: %d bytes\r\n",
+            (uint16_t)(uint8_t *)__data_end - (uint16_t)(uint8_t *)__data_start
+            + (uint16_t)(uint8_t *)__heap_end__ - (uint16_t)(uint8_t *)__heap_base__
+            + (uint16_t)(uint8_t *)__bss_end - (uint16_t)(uint8_t *)__bss_start);
 }
 
 static void cmd_threads(BaseChannel *chp, int argc, char *argv[]) {
