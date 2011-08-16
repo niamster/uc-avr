@@ -20,6 +20,9 @@
 #include "ch.h"
 #include "hal.h"
 #include "evtimer.h"
+#include "shell.h"
+#include "chprintf.h"
+#include "chheap.h"
 
 static void print(const char *msgp) {
 
@@ -84,12 +87,96 @@ static void TimerHandler(eventid_t id) {
         LED_TOGGLE(1);
 }
 
+#define SHELL_WA_SIZE   THD_WA_SIZE(1024)
+
+static void cmd_mem(BaseChannel *chp, int argc, char *argv[]) {
+#if CH_USE_HEAP
+  size_t n, size;
+#endif
+
+  (void)argv;
+#if CH_USE_HEAP
+  if (argc > 0) {
+    chprintf(chp, "Usage: mem\r\n");
+    return;
+  }
+  n = chHeapStatus(NULL, &size);
+  chprintf(chp, "heap fragments   : %u\r\n", n);
+  chprintf(chp, "heap free total  : %u bytes\r\n", size);
+#else
+  chprintf(chp, "Heap was not built in\r\n");
+#endif
+#if CH_USE_MEMCORE
+  chprintf(chp, "core free memory : %u bytes\r\n", chCoreStatus());
+#endif
+}
+
+static void cmd_threads(BaseChannel *chp, int argc, char *argv[]) {
+#if CH_USE_REGISTRY
+  static const char *states[] = {
+    "READY",
+    "CURRENT",
+    "SUSPENDED",
+    "WTSEM",
+    "WTMTX",
+    "WTCOND",
+    "SLEEPING",
+    "WTEXIT",
+    "WTOREVT",
+    "WTANDEVT",
+    "SNDMSGQ",
+    "SNDMSG",
+    "WTMSG",
+    "WTQUEUE",
+    "FINAL"
+  };
+  Thread *tp;
+#endif
+
+  (void)argv;
+#if CH_USE_REGISTRY
+  if (argc > 0) {
+    chprintf(chp, "Usage: threads\r\n");
+    return;
+  }
+  chprintf(chp, "    addr    stack prio refs     state time\r\n");
+  tp = chRegFirstThread();
+  do {
+#if CH_DBG_THREADS_PROFILING
+      systime_t p_time = tp->p_time;
+#else
+      systime_t p_time = 0;
+#endif
+    chprintf(chp, "%.8x %.8x %4lu %4lu %9s %lu\r\n",
+            (uint16_t)tp, (uint16_t)tp->p_ctx.sp,
+            (uint32_t)tp->p_prio, (uint32_t)(tp->p_refs - 1),
+            states[tp->p_state], (uint32_t)p_time);
+    tp = chRegNextThread(tp);
+  } while (tp != NULL);
+#else
+  chprintf(chp, "Registry was not built in\r\n");
+#endif
+}
+
+static const ShellCommand shCmds[] = {
+  {"mem", cmd_mem},
+  {"threads", cmd_threads},
+  {NULL, NULL}
+};
+
+static const ShellConfig shCfg = {
+  (BaseChannel *)&SD2,
+  shCmds
+};
+
 int main(int argc, char **argv) {
   static EvTimer evt;
   static evhandler_t handlers[1] = {
     TimerHandler
   };
   static EventListener el0;
+
+  Thread *sh = NULL;
 
   /*
    * System initializations.
@@ -107,6 +194,11 @@ int main(int argc, char **argv) {
   sdStart(&SD2, NULL);
 
   /*
+   * Shell manager initialization.
+   */
+  shellInit();
+
+  /*
    * Event Timer initialization.
    */
   evtInit(&evt, MS2ST(500));            /* Initializes an event timer object.   */
@@ -118,8 +210,23 @@ int main(int argc, char **argv) {
    */
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
-  while(TRUE)
-    chEvtDispatch(handlers, chEvtWaitOne(ALL_EVENTS));
+  while (TRUE) {
+      if (!sh) {
+          sh = shellCreate(&shCfg, SHELL_WA_SIZE, NORMALPRIO);
+      } else if (chThdTerminated(sh)) {
+          chThdRelease(sh);    /* Recovers memory of the previous shell. */
+          sh = NULL;           /* Triggers spawning of a new shell.      */
+      }
+
+      if (!sh)
+          LED_ON(6);
+      else
+          LED_OFF(6);
+
+      LED_TOGGLE(7);
+
+      chEvtDispatch(handlers, chEvtWaitOne(ALL_EVENTS));
+  }
 
   return 0;
 }

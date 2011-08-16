@@ -92,14 +92,16 @@ include $(CHIBIOS)/os/kernel/kernel.mk
 VPATH = $(ROOT)/$(BOARD):$(CHIBIOS)/os/ports/GCC/AVR:$(CHIBIOS)/os/kernel/src:$(CHIBIOS)/os/hal/src:$(CHIBIOS)/os/hal/platforms/AVR:$(CHIBIOS)/os/various:$(CHIBIOS)/test:
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(PORTSRC) \
-      $(KERNSRC) \
-      $(TESTSRC) \
-      $(HALSRC) \
-      $(PLATFORMSRC) \
-      $(BOARDSRC) \
-      $(CHIBIOS)/os/various/evtimer.c \
-      main.c
+SRC =	$(PORTSRC) \
+		$(KERNSRC) \
+		$(TESTSRC) \
+		$(HALSRC) \
+		$(PLATFORMSRC) \
+		$(BOARDSRC) \
+		$(CHIBIOS)/os/various/evtimer.c \
+		$(CHIBIOS)/os/various/shell.c \
+		$(CHIBIOS)/os/various/chprintf.c \
+		main.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -119,7 +121,7 @@ ASRC =
 # Optimization level, can be [0, 1, 2, 3, s].
 #     0 = turn off optimization. s = optimize for size.
 #     (Note: 3 is not always the best optimization level. See avr-libc FAQ.)
-OPT = 2
+OPT = s
 
 
 # Debugging format.
@@ -156,8 +158,8 @@ ADEFS = -DF_CPU=$(F_CPU)
 
 # Place -D or -U options here for C++ sources
 CPPDEFS = -DF_CPU=$(F_CPU)UL
-#CPPDEFS += -D__STDC_LIMIT_MACROS
-#CPPDEFS += -D__STDC_CONSTANT_MACROS
+# CPPDEFS += -D__STDC_LIMIT_MACROS
+# CPPDEFS += -D__STDC_CONSTANT_MACROS
 
 
 #---------------- Compiler Options C ----------------
@@ -211,7 +213,7 @@ CFLAGS += -Wundef
 #CPPFLAGS += -Wsign-compare
 CPPFLAGS += -Wa,-adhlns=$(<F:%.cpp=$(OBJDIR)/%.lst)
 CPPFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
-#CPPFLAGS += $(CSTANDARD)
+CPPFLAGS += $(CSTANDARD)
 
 
 #---------------- Assembler Options ----------------
@@ -231,10 +233,9 @@ ASFLAGS = $(ADEFS) -Wa,-adhlns=$(<F:%.S=$(OBJDIR)/%.lst),-gstabs,--listing-cont-
 #PRINTF_LIB_MIN = -Wl,-u,vfprintf -lprintf_min
 
 # Floating point printf version (requires MATH_LIB = -lm below)
-PRINTF_LIB_FLOAT = -Wl,-u,vfprintf -lprintf_flt
+#PRINTF_LIB_FLOAT = -Wl,-u,vfprintf -lprintf_flt
 
 # If this is left blank, then it will use the Standard printf version.
-PRINTF_LIB = $(PRINTF_LIB_MIN)
 #PRINTF_LIB = $(PRINTF_LIB_MIN)
 #PRINTF_LIB = $(PRINTF_LIB_FLOAT)
 
@@ -243,15 +244,14 @@ PRINTF_LIB = $(PRINTF_LIB_MIN)
 #SCANF_LIB_MIN = -Wl,-u,vfscanf -lscanf_min
 
 # Floating point + %[ scanf version (requires MATH_LIB = -lm below)
-SCANF_LIB_FLOAT = -Wl,-u,vfscanf -lscanf_flt
+#SCANF_LIB_FLOAT = -Wl,-u,vfscanf -lscanf_flt
 
 # If this is left blank, then it will use the Standard scanf version.
-SCANF_LIB = $(SCANF_LIB_MIN)
 #SCANF_LIB = $(SCANF_LIB_MIN)
 #SCANF_LIB = $(SCANF_LIB_FLOAT)
 
 
-MATH_LIB = -lm
+#MATH_LIB = -lm
 
 
 # List any extra directories to look for libraries here.
@@ -265,13 +265,18 @@ EXTRALIBDIRS =
 
 # 64 KB of external RAM, starting after internal RAM (ATmega128!),
 # used for variables (.data/.bss) and heap (malloc()).
-#EXTMEMOPTS = -Wl,-Tdata=0x801100,--defsym=__heap_end=0x80ffff
+#EXTMEMOPTS = -Wl,--section-start,.data=0x801100,--defsym=__heap_base__=__heap_start,--defsym=__heap_end__=0x80ffff
 
 # 64 KB of external RAM, starting after internal RAM (ATmega128!),
 # only used for heap (malloc()).
-#EXTMEMOPTS = -Wl,--section-start,.data=0x801100,--defsym=__heap_end=0x80ffff
+#EXTMEMOPTS = -Wl,--defsym=__heap_base__=__heap_start,--defsym=__heap_end__=0x80ffff
 
 EXTMEMOPTS =
+
+
+#---------------- Internal Memory Options ----------------
+INTMEMOPTS = -Wl,--defsym=__heap_base__=__heap_start,--defsym=__heap_end__=0x8010ff
+#INTMEMOPTS =
 
 
 #---------------- Linker Options ----------------
@@ -280,6 +285,7 @@ EXTMEMOPTS =
 #    --cref:    add cross reference to  map file
 LDFLAGS = -Wl,-Map=$(OUTDIR)/$(TARGET).map,--cref
 LDFLAGS += $(EXTMEMOPTS)
+LDFLAGS += $(INTMEMOPTS)
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
 LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 #LDFLAGS += -T linker_script.x

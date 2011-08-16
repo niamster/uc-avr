@@ -82,7 +82,7 @@
  * @note    Requires @p CH_USE_MEMCORE.
  */
 #if !defined(CH_MEMCORE_SIZE) || defined(__DOXYGEN__)
-#define CH_MEMCORE_SIZE                 128
+#define CH_MEMCORE_SIZE                 0
 #endif
 
 /**
@@ -115,7 +115,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_OPTIMIZE_SPEED) || defined(__DOXYGEN__)
-#define CH_OPTIMIZE_SPEED               TRUE
+#define CH_OPTIMIZE_SPEED               FALSE
 #endif
 
 /*===========================================================================*/
@@ -129,7 +129,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_REGISTRY) || defined(__DOXYGEN__)
-#define CH_USE_REGISTRY                 FALSE
+#define CH_USE_REGISTRY                 TRUE
 #endif
 
 /**
@@ -140,7 +140,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_WAITEXIT) || defined(__DOXYGEN__)
-#define CH_USE_WAITEXIT                 FALSE
+#define CH_USE_WAITEXIT                 TRUE
 #endif
 
 /**
@@ -184,7 +184,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_MUTEXES) || defined(__DOXYGEN__)
-#define CH_USE_MUTEXES                  FALSE
+#define CH_USE_MUTEXES                  TRUE
 #endif
 
 /**
@@ -286,7 +286,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_USE_MEMCORE) || defined(__DOXYGEN__)
-#define CH_USE_MEMCORE                  FALSE
+#define CH_USE_MEMCORE                  TRUE
 #endif
 
 /**
@@ -300,7 +300,7 @@
  * @note    Mutexes are recommended.
  */
 #if !defined(CH_USE_HEAP) || defined(__DOXYGEN__)
-#define CH_USE_HEAP                     FALSE
+#define CH_USE_HEAP                     TRUE
 #endif
 
 /**
@@ -334,16 +334,27 @@
  *          in the kernel.
  *
  * @note    The default is @p TRUE.
- * @note    Requires @p CH_USE_WAITEXIT.
+ * @note    Requires @p CH_USE_WAITEXIT
  * @note    Requires @p CH_USE_HEAP and/or @p CH_USE_MEMPOOLS.
  */
 #if !defined(CH_USE_DYNAMIC) || defined(__DOXYGEN__)
-#define CH_USE_DYNAMIC                  FALSE
+#define CH_USE_DYNAMIC                  TRUE
 #endif
 
 /*===========================================================================*/
 /* Debug options.                                                            */
 /*===========================================================================*/
+
+/**
+ * @brief   Debug option, system state check.
+ * @details If enabled the correct call protocol for system APIs is checked
+ *          at runtime.
+ *
+ * @note    The default is @p FALSE.
+ */
+#if !defined(CH_DBG_SYSTEM_STATE_CHECK) || defined(__DOXYGEN__)
+#define CH_DBG_SYSTEM_STATE_CHECK       FALSE
+#endif
 
 /**
  * @brief   Debug option, parameters checks.
@@ -455,6 +466,16 @@
 #if !defined(THREAD_EXT_EXIT_HOOK) || defined(__DOXYGEN__)
 #define THREAD_EXT_EXIT_HOOK(tp) {                                          \
   /* Add threads finalization code here.*/                                  \
+}
+#endif
+
+/**
+ * @brief   Context switch hook.
+ * @details This hook is invoked just before switching between threads.
+ */
+#if !defined(THREAD_CONTEXT_SWITCH_HOOK) || defined(__DOXYGEN__)
+#define THREAD_CONTEXT_SWITCH_HOOK(ntp, otp) {                              \
+  /* System halt code here.*/                                               \
 }
 #endif
 

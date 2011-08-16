@@ -121,7 +121,7 @@
     } while (0)
 
 #define LED_OFF(led) do {                       \
-        PORTC = 1 << (led);                     \
+        PORTC |= 1 << (led);                    \
     } while (0)
 
 #define LED_TOGGLE(led) do {                    \
