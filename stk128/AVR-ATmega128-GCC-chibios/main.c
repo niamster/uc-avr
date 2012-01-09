@@ -17,12 +17,25 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>
+
 #include "ch.h"
 #include "hal.h"
 #include "evtimer.h"
 #include "shell.h"
 #include "chprintf.h"
 #include "chheap.h"
+
+#include "iv9.h"
+
+enum g_event {
+    G_EVENT_GEN_TMR,
+
+    G_EVENT_QTY
+};
+
+static EvTimer gEvt[G_EVENT_QTY];
+static EventListener gEl[G_EVENT_QTY];
 
 static void print(const char *msgp) {
 
@@ -69,17 +82,91 @@ void hello(void) {
 
 static WORKING_AREA(waThread1, 32);
 static msg_t Thread1(void *arg) {
-
     while (TRUE) {
         chThdSleepMilliseconds(1000);
+
         LED_TOGGLE(0);
     }
 
     return 0;
 }
 
-static void TimerHandler(eventid_t id) {
-    /* msg_t TestThread(void *p); */
+#if 0
+/*
+ * PWM callback on counter reset.
+ */
+static void pwmCntRst(PWMDriver *pwmp) {
+
+  (void)pwmp;
+
+  chSysLockFromIsr();
+
+  chSysUnlockFromIsr();
+}
+
+/*
+ * PWM callback on compare event.
+ */
+static void pwmChCmp(PWMDriver *pwmp) {
+
+  (void)pwmp;
+
+  chSysLockFromIsr();
+
+  chSysUnlockFromIsr();
+}
+#endif
+
+/*
+ * PWM configuration structure.
+ */
+static PWMConfig pwmCfg = {
+  14456,                                    /* 14KHz PWM clock frequency.   */
+  0xFF,                                     /* PWM period (full).           */
+  NULL,
+  {
+    {PWM_OUTPUT_ACTIVE_HIGH, NULL},
+  },
+};
+
+static WORKING_AREA(waIvCntThread, 128);
+static msg_t ivCntThread(void *arg) {
+    enum iv9_symbol sym = IV9_SYMBOL_0;
+
+    uint8_t period = 0;
+    const uint8_t floor = 0;
+    const uint8_t ceil = 200;
+
+    /*
+     * Initializes the PWM driver 2.
+     */
+    pwmStart(&PWMD2, &pwmCfg);
+    pwmEnableChannel(&PWMD2, 0, 0);
+
+    while (TRUE) {
+        chThdSleepMilliseconds(2000);
+
+        for (;period < ceil; ++period) {
+            pwmChangePeriod(&PWMD2, period);
+            chThdSleepMilliseconds(10);
+        }
+
+        iv9_show(sym);
+        if (++sym > IV9_SYMBOL_9)
+            sym = IV9_SYMBOL_0;
+
+        for (;period > floor; --period) {
+            pwmChangePeriod(&PWMD2, period);
+            chThdSleepMilliseconds(10);
+        }
+    }
+
+    return 0;
+}
+
+static void TimerEvtHandler(eventid_t id) {
+    if (id != 0)
+        return;
 
     if (BTN_K1_PRESSED)
         hello();
@@ -175,9 +262,34 @@ static void cmd_threads(BaseChannel *chp, int argc, char *argv[]) {
 #endif
 }
 
+static void cmd_pwm(BaseChannel *chp, int argc, char *argv[]) {
+    uint32_t frequency;
+    pwmcnt_t period;
+
+    if (argc != 2) {
+        chprintf(chp, "Usage: pwm [freq] [period]\r\n");
+        return;
+    }
+
+    frequency = atoi(argv[0]);
+    if (frequency)
+        pwmCfg.frequency = frequency;
+    period = atoi(argv[1]);
+    if (period)
+        pwmCfg.period = period;
+    chprintf(chp, "Setting PWM period=%d, freq=%u\r\n",
+            pwmCfg.period, pwmCfg.frequency);
+
+    pwmStop(&PWMD2);
+    pwmStart(&PWMD2, &pwmCfg);
+
+    pwmEnableChannel(&PWMD2, 0, 0);
+}
+
 static const ShellCommand shCmds[] = {
     {"mem", cmd_mem},
     {"threads", cmd_threads},
+    {"pwm", cmd_pwm},
     {NULL, NULL}
 };
 
@@ -187,11 +299,9 @@ static const ShellConfig shCfg = {
 };
 
 int main(int argc, char **argv) {
-    static EvTimer evt;
-    static evhandler_t handlers[1] = {
-        TimerHandler
+    static evhandler_t handlers[G_EVENT_QTY] = {
+        [G_EVENT_GEN_TMR] = TimerEvtHandler,
     };
-    static EventListener el0;
 
     Thread *sh = NULL;
 
@@ -218,14 +328,17 @@ int main(int argc, char **argv) {
     /*
      * Event Timer initialization.
      */
-    evtInit(&evt, MS2ST(500));            /* Initializes an event timer object.   */
-    evtStart(&evt);                       /* Starts the event timer.              */
-    chEvtRegister(&evt.et_es, &el0, 0);   /* Registers on the timer event source. */
+    evtInit(&gEvt[G_EVENT_GEN_TMR], MS2ST(500));              /* Initializes an event timer object.   */
+    chEvtRegister(&gEvt[G_EVENT_GEN_TMR].et_es, &gEl[G_EVENT_GEN_TMR], G_EVENT_GEN_TMR);   /* Registers on the timer event source. */
 
     /*
-     * Starts thread.
+     * Start threads.
      */
     chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
+    chThdCreateStatic(waIvCntThread, sizeof(waIvCntThread), HIGHPRIO, ivCntThread, NULL);
+
+    /* Starts the event on generic timer. */
+    evtStart(&gEvt[G_EVENT_GEN_TMR]);
 
     while (TRUE) {
         if (!sh) {
@@ -242,7 +355,7 @@ int main(int argc, char **argv) {
 
         LED_TOGGLE(7);
 
-        chEvtDispatch(handlers, chEvtWaitOne(ALL_EVENTS));
+        chEvtDispatch(handlers, chEvtWaitAny(ALL_EVENTS));
     }
 
     return 0;

@@ -87,4 +87,6 @@ void boardInit(void) {
   TCNT0  = 0;                                           /* Reset counter.   */
   TIFR   = (1 << OCF0);                                 /* Reset pending.   */
   TIMSK  = (1 << OCIE0);                                /* IRQ on compare.  */
+
+  board_iv9_init();
 }

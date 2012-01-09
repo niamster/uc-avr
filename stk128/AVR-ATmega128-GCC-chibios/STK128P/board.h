@@ -29,26 +29,26 @@
  */
 #define BOARD_NAME "STK128+"
 
-/*        PA7  PA6  PA5  PA4  PA3  PA2  PA1  PA0
- *        IN   IN   IN   IN   IN   IN   IN   IN
- * DDRA   0    0    0    0    0    0    0    0
- *        PU   PU   PU   PU   PU   PU   PU   PU
+/*        I7   I6   I5   I4   I3   I2   I1   I0
+ *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  OUT
+ * DDRA   1    1    1    1    1    1    1    1
+ *        VAL  VAL  VAL  VAL  VAL  VAL  VAL  VAL
  * PORTA  1    1    1    1    1    1    1    1
  */
-#define VAL_DDRA  0x00
+#define VAL_DDRA  0xFF
 #define VAL_PORTA 0xFF
 
-/*        PB7  PB6  PB5  PB4  K4   K3   K2  K1
- *        IN   IN   IN   IN   IN   IN   IN   IN
- * DDRB   0    0    0    0    0    0    0    0
- *        PU   PU   PU   PU   PU   PU   PU   PU
- * PORTB  1    1    1    1    1    1    1    1
+/*        OC2  PB6  PB5  PB4  K4   K3   K2  K1
+ *        OUT  IN   IN   IN   IN   IN   IN   IN
+ * DDRB   1    0    0    0    0    0    0    0
+ *        VAL  PU   PU   PU   PU   PU   PU   PU
+ * PORTB  0    1    1    1    1    1    1    1
  */
-#define VAL_DDRB  0x00
-#define VAL_PORTB 0xFF
+#define VAL_DDRB  0x80
+#define VAL_PORTB 0x7F
 
-/*        PC7  PC6  PC5  PC4  K4   K3   K2  K1
- *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  IN
+/*        L7   L6   L5   L4   L3   L2   L1   L0
+ *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  OUT
  * DDRC   1    1    1    1    1    1    1    1
  *        VAL  VAL  VAL  VAL  VAL  VAL  VAL  VAL
  * PORTC  1    1    1    1    1    1    1    1
@@ -64,6 +64,7 @@
  */
 #define VAL_DDRD  0x08
 #define VAL_PORTD 0xF8
+
 
 /*        PE7  PE6  PE5  PE4  PE3  PE2  PE1  PE0
  *        IN   IN   IN   IN   IN   IN   IN   IN
@@ -132,6 +133,17 @@
 #define SET_LED_MASK(mask) do {                 \
         PORTC = ~(mask);                        \
     } while (0)
+
+/* IV9 */
+#define IV9_PORT PORTA
+
+#if defined(IV9_PORT)
+#define IV9_DIRECT_CONNECTION
+void iv9_init(void);
+#define board_iv9_init iv9_init
+#else
+#define board_iv9_init() do {} while (0)
+#endif
 
 #if !defined(_FROM_ASM_)
 #ifdef __cplusplus

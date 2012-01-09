@@ -101,7 +101,7 @@ SRC =	$(PORTSRC) \
 		$(CHIBIOS)/os/various/evtimer.c \
 		$(CHIBIOS)/os/various/shell.c \
 		$(CHIBIOS)/os/various/chprintf.c \
-		main.c
+		main.c iv9.c pwm_lld.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
