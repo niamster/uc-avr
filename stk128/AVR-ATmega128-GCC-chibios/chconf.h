@@ -1,5 +1,6 @@
 /*
-    ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010 Giovanni Di Sirio.
+    ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010,
+                 2011,2012 Giovanni Di Sirio.
 
     This file is part of ChibiOS/RT.
 
@@ -31,6 +32,13 @@
 #ifndef _CHCONF_H_
 #define _CHCONF_H_
 
+/*===========================================================================*/
+/**
+ * @name Kernel parameters and options
+ * @{
+ */
+/*===========================================================================*/
+
 /**
  * @brief   System tick frequency.
  * @details Frequency of the system timer that drives the system ticks. This
@@ -53,21 +61,6 @@
  */
 #if !defined(CH_TIME_QUANTUM) || defined(__DOXYGEN__)
 #define CH_TIME_QUANTUM                 20
-#endif
-
-/**
- * @brief   Nested locks.
- * @details If enabled then the use of nested @p chSysLock() / @p chSysUnlock()
- *          operations is allowed.<br>
- *          For performance and code size reasons the recommended setting
- *          is to leave this option disabled.<br>
- *          You may use this option if you need to merge ChibiOS/RT with
- *          external libraries that require nested lock/unlock operations.
- *
- * @note    The default is @p FALSE.
- */
-#if !defined(CH_USE_NESTED_LOCKS) || defined(__DOXYGEN__)
-#define CH_USE_NESTED_LOCKS             FALSE
 #endif
 
 /**
@@ -102,8 +95,13 @@
 #define CH_NO_IDLE_THREAD               FALSE
 #endif
 
+/** @} */
+
 /*===========================================================================*/
-/* Performance options.                                                      */
+/**
+ * @name Performance options
+ * @{
+ */
 /*===========================================================================*/
 
 /**
@@ -118,8 +116,13 @@
 #define CH_OPTIMIZE_SPEED               FALSE
 #endif
 
+/** @} */
+
 /*===========================================================================*/
-/* Subsystem options.                                                        */
+/**
+ * @name Subsystem options
+ * @{
+ */
 /*===========================================================================*/
 
 /**
@@ -334,15 +337,20 @@
  *          in the kernel.
  *
  * @note    The default is @p TRUE.
- * @note    Requires @p CH_USE_WAITEXIT
+ * @note    Requires @p CH_USE_WAITEXIT.
  * @note    Requires @p CH_USE_HEAP and/or @p CH_USE_MEMPOOLS.
  */
 #if !defined(CH_USE_DYNAMIC) || defined(__DOXYGEN__)
 #define CH_USE_DYNAMIC                  TRUE
 #endif
 
+/** @} */
+
 /*===========================================================================*/
-/* Debug options.                                                            */
+/**
+ * @name Debug options
+ * @{
+ */
 /*===========================================================================*/
 
 /**
@@ -429,8 +437,13 @@
 #define CH_DBG_THREADS_PROFILING        FALSE
 #endif
 
+/** @} */
+
 /*===========================================================================*/
-/* Kernel hooks.                                                             */
+/**
+ * @name Kernel hooks
+ * @{
+ */
 /*===========================================================================*/
 
 /**
@@ -510,6 +523,8 @@
   /* System halt code here.*/                                               \
 }
 #endif
+
+/** @} */
 
 /*===========================================================================*/
 /* Port-specific settings (override port settings defaulted in chcore.h).    */
