@@ -30,6 +30,7 @@
  */
 #define BOARD_NAME "STK128+"
 
+#if defined(IV9)
 /*        I7   I6   I5   I4   I3   I2   I1   I0
  *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  OUT
  * DDRA   1    1    1    1    1    1    1    1
@@ -38,6 +39,25 @@
  */
 #define VAL_DDRA  0xFF
 #define VAL_PORTA 0xFF
+#elif defined(CY7C4XX)
+/*        D7   D6   D5   D4   D3   D2   D1   D0
+ *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  OUT
+ * DDRA   1    1    1    1    1    1    1    1
+ *        VAL  VAL  VAL  VAL  VAL  VAL  VAL  VAL
+ * PORTA  1    1    1    1    1    1    1    1
+ */
+#define VAL_DDRA  0xFF
+#define VAL_PORTA 0xFF
+#else
+/*        PA7  PA6  PA5  PA4  PA3  PA2  PA1  PA0
+ *        IN   IN   IN   IN   IN   IN   IN   IN
+ * DDRA   0    0    0    0    0    0    0    0
+ *        PU   PU   PU   PU   PU   PU   PU   PU
+ * PORTA  1    1    1    1    1    1    1    1
+ */
+#define VAL_DDRA  0x00
+#define VAL_PORTA 0xFF
+#endif
 
 /*        OC2  PB6  PB5  PB4  K4   K3   K2  K1
  *        OUT  IN   IN   IN   IN   IN   IN   IN
@@ -76,6 +96,16 @@
 #define VAL_DDRE  0x00
 #define VAL_PORTE 0xFF
 
+#if defined(CY7C4XX)
+/*        PF7  PF6  PF5  PF4  CCR  RCR  /W   /FF
+ *        IN   IN   IN   IN   OUT  IN   OUT  IN
+ * DDRF   0    0    0    0    1    0    1    0
+ *        PU   PU   PU   PU   VAL  PU   VAL  PU
+ * PORTF  1    1    1    1    1    1    1    1
+ */
+#define VAL_DDRF  0x0A
+#define VAL_PORTF 0xFF
+#else
 /*        PF7  PF6  PF5  PF4  PF3  PF2  PF1  PF0
  *        IN   IN   IN   IN   IN   IN   IN   IN
  * DDRF   0    0    0    0    0    0    0    0
@@ -84,6 +114,7 @@
  */
 #define VAL_DDRF  0x00
 #define VAL_PORTF 0xFF
+#endif
 
 /*        x    x    x    x    PG3  PG2  PG1  PG0
  *        x    x    x    x    IN   IN   IN   IN
@@ -135,15 +166,31 @@
         PORTC = ~(mask);                        \
     } while (0)
 
-/* IV9 */
+#if defined(IV9)
 #define IV9_PORT PORTA
-
-#if defined(IV9_PORT)
 #define IV9_DIRECT_CONNECTION
-void iv9_init(void);
-#define board_iv9_init iv9_init
-#else
-#define board_iv9_init() do {} while (0)
+#endif
+
+#if defined(CY7C4XX)
+#define CY7C4XX_PORT PORTA
+
+#define CY7C4XX_CURRENT_CPU_READY_PORT PORTF
+#define CY7C4XX_CURRENT_CPU_READY_BIT  3
+
+#define CY7C4XX_REMOTE_CPU_READY_PORT  PINF
+#define CY7C4XX_REMOTE_CPU_READY_BIT   2
+
+#define CY7C4XX_WRITE_N_PORT           PORTF
+#define CY7C4XX_WRITE_N_BIT            1
+
+#define CY7C4XX_FULL_N_PORT            PINF
+#define CY7C4XX_FULL_N_BIT             0
+#endif
+
+#if defined(CY7C4XX) && defined(IV9)
+#if (CY7C4XX_PORT == IV9_PORT)
+#error "CY7C4XX_PORT == IV9_PORT"
+#endif
 #endif
 
 #if !defined(_FROM_ASM_)

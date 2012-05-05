@@ -101,7 +101,7 @@ SRC =	$(PORTSRC) \
 		$(CHIBIOS)/os/various/evtimer.c \
 		$(CHIBIOS)/os/various/shell.c \
 		$(CHIBIOS)/os/various/chprintf.c \
-		main.c iv9.c pwm_lld.c
+		main.c iv9.c cy7c4xx.c pwm_lld.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -161,6 +161,16 @@ CPPDEFS = -DF_CPU=$(F_CPU)UL
 # CPPDEFS += -D__STDC_LIMIT_MACROS
 # CPPDEFS += -D__STDC_CONSTANT_MACROS
 
+# peripherals
+IV9 ?= 0
+ifeq ($(IV9), 1)
+CDEFS += -DIV9
+endif
+
+CY7C4XX ?= 0
+ifeq ($(CY7C4XX), 1)
+CDEFS += -DCY7C4XX
+endif
 
 #---------------- Compiler Options C ----------------
 #  -g*:          generate debugging information

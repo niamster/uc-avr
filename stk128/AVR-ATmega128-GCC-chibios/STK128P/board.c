@@ -21,6 +21,9 @@
 #include "ch.h"
 #include "hal.h"
 
+#include "iv9.h"
+#include "cy7c4xx.h"
+
 CH_IRQ_HANDLER(TIMER0_COMP_vect) {
   CH_IRQ_PROLOGUE();
 
@@ -89,5 +92,6 @@ void boardInit(void) {
   TIFR   = (1 << OCF0);                                 /* Reset pending.   */
   TIMSK  = (1 << OCIE0);                                /* IRQ on compare.  */
 
-  board_iv9_init();
+  iv9_init();
+  cy7c4xx_init();
 }

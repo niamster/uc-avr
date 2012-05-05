@@ -18,36 +18,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ch.h"
-#include "hal.h"
-#include "board.h"
-#include "iv9.h"
+#ifndef _CY7C4XX_H_
+#define _CY7C4XX_H_
 
-#if defined(IV9)
-static unsigned char iv9_symbol_table[] = {
-    [IV9_SYMBOL_0] = ~0xDE,
-    [IV9_SYMBOL_1] = ~0x06,
-    [IV9_SYMBOL_2] = ~0xEA,
-    [IV9_SYMBOL_3] = ~0x6E,
-    [IV9_SYMBOL_4] = ~0x36,
-    [IV9_SYMBOL_5] = ~0x7C,
-    [IV9_SYMBOL_6] = ~0xFC,
-    [IV9_SYMBOL_7] = ~0x0E,
-    [IV9_SYMBOL_8] = ~0xFE,
-    [IV9_SYMBOL_9] = ~0x7E,
-    [IV9_SYMBOL_COMA] = ~0x01,
+#if defined(CY7C4XX)
+enum cy7c4xx_cmd {
+    CY7C4XX_CMD_UART,
+    CY7C4XX_CMD_USB,
 };
 
-void iv9_init(void)
-{
-}
+void cy7c4xx_init(void);
 
-void iv9_show(enum iv9_symbol sym)
-{
-#if defined(IV9_DIRECT_CONNECTION)
-    IV9_PORT = iv9_symbol_table[sym];
+inline int cy7c4xx_push(unsigned char c);
+
+/* pushes data to fifo as command
+   defragments if needed
+ */
+int cy7c4xx_push_cmd(enum cy7c4xx_cmd cmd, unsigned char *s, int len);
 #else
-#error IV9 indirect access not supported
+static void cy7c4xx_init(void) {}
 #endif
-}
-#endif
+
+#endif /* _CY7C4XX_H_ */

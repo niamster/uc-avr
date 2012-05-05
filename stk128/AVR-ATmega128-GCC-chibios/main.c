@@ -19,6 +19,7 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "ch.h"
 #include "hal.h"
@@ -28,6 +29,7 @@
 #include "chheap.h"
 
 #include "iv9.h"
+#include "cy7c4xx.h"
 
 enum g_event {
     G_EVENT_GEN_TMR,
@@ -130,8 +132,9 @@ static PWMConfig pwmCfg = {
   },
 };
 
-static WORKING_AREA(waIvCntThread, 128);
-static msg_t ivCntThread(void *arg) {
+#if defined(IV9)
+static WORKING_AREA(waIv9CntThread, 128);
+static msg_t iv9CntThread(void *arg) {
     enum iv9_symbol sym = IV9_SYMBOL_0;
 
     uint8_t period = 0;
@@ -164,6 +167,7 @@ static msg_t ivCntThread(void *arg) {
 
     return 0;
 }
+#endif
 
 static void TimerEvtHandler(eventid_t id) {
     if (id != 0)
@@ -287,10 +291,34 @@ static void cmd_pwm(BaseChannel *chp, int argc, char *argv[]) {
     pwmEnableChannel(&PWMD2, 0, 0);
 }
 
+#if defined(CY7C4XX)
+static void cmd_cy7c4xx(BaseChannel *chp, int argc, char *argv[]) {
+    enum cy7c4xx_cmd cmd;
+
+    if (argc != 2) {
+        chprintf(chp, "Usage: cy7c4xx [usb|uart] [string]\r\n");
+        return;
+    }
+    if (!memcmp(argv[0], "usb", 3)) {
+        cmd = CY7C4XX_CMD_USB;
+    } else if (!memcmp(argv[0], "uart", 4)) {
+        cmd = CY7C4XX_CMD_UART;
+    } else {
+        chprintf(chp, "Unknown command: %s\r\n", argv[0]);
+        return;
+    }
+
+    cy7c4xx_push_cmd(cmd, argv[1], strlen(argv[1]));
+}
+#endif
+
 static const ShellCommand shCmds[] = {
     {"mem", cmd_mem},
     {"threads", cmd_threads},
     {"pwm", cmd_pwm},
+#if defined(CY7C4XX)
+    {"cy7c4xx", cmd_cy7c4xx},
+#endif
     {NULL, NULL}
 };
 
@@ -336,7 +364,9 @@ int main(int argc, char **argv) {
      * Start threads.
      */
     chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
-    chThdCreateStatic(waIvCntThread, sizeof(waIvCntThread), HIGHPRIO, ivCntThread, NULL);
+#if defined(IV9)
+    chThdCreateStatic(waIv9CntThread, sizeof(waIvCntThread), HIGHPRIO, iv9CntThread, NULL);
+#endif
 
     /* Starts the event on generic timer. */
     evtStart(&gEvt[G_EVENT_GEN_TMR]);

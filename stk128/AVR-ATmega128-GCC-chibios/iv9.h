@@ -21,6 +21,7 @@
 #ifndef _IV9_H_
 #define _IV9_H_
 
+#if defined(IV9)
 enum iv9_symbol {
     IV9_SYMBOL_0,
     IV9_SYMBOL_1,
@@ -38,5 +39,8 @@ enum iv9_symbol {
 void iv9_init(void);
 
 void iv9_show(enum iv9_symbol sym);
+#else
+static void iv9_init(void) {}
+#endif
 
 #endif /* _IV9_H_ */
