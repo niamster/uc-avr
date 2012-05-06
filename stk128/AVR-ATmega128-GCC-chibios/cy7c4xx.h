@@ -22,19 +22,12 @@
 #define _CY7C4XX_H_
 
 #if defined(CY7C4XX)
-enum cy7c4xx_cmd {
-    CY7C4XX_CMD_UART,
-    CY7C4XX_CMD_USB,
-};
-
 void cy7c4xx_init(void);
 
-inline int cy7c4xx_push(unsigned char c);
-
-/* pushes data to fifo as command
+/* pushes data to fifo
    defragments if needed
  */
-int cy7c4xx_push_cmd(enum cy7c4xx_cmd cmd, unsigned char *s, int len);
+int cy7c4xx_push(unsigned char *s, int len);
 #else
 static void cy7c4xx_init(void) {}
 #endif

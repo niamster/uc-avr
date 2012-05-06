@@ -293,22 +293,12 @@ static void cmd_pwm(BaseChannel *chp, int argc, char *argv[]) {
 
 #if defined(CY7C4XX)
 static void cmd_cy7c4xx(BaseChannel *chp, int argc, char *argv[]) {
-    enum cy7c4xx_cmd cmd;
-
-    if (argc != 2) {
-        chprintf(chp, "Usage: cy7c4xx [usb|uart] [string]\r\n");
-        return;
-    }
-    if (!memcmp(argv[0], "usb", 3)) {
-        cmd = CY7C4XX_CMD_USB;
-    } else if (!memcmp(argv[0], "uart", 4)) {
-        cmd = CY7C4XX_CMD_UART;
-    } else {
-        chprintf(chp, "Unknown command: %s\r\n", argv[0]);
+    if (argc != 1) {
+        chprintf(chp, "Usage: cy7c4xx [string]\r\n");
         return;
     }
 
-    cy7c4xx_push_cmd(cmd, argv[1], strlen(argv[1]));
+    cy7c4xx_push(argv[0], strlen(argv[0]));
 }
 #endif
 
