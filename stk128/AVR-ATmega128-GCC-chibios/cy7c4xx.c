@@ -24,22 +24,28 @@
 #include "cy7c4xx.h"
 
 #if defined(CY7C4XX)
-#define CY7C4XX_MAX_CMD_LEN 0xFF
+#define CY7C4XX_MAX_CMD_LEN 0x40
 
 void cy7c4xx_init(void)
 {
+    /* reset cycle is about 25nS, at 7.xxMHz it's less than one instruction */
+    /* recover from reset cycle is about 10nS, at 7.xxMHz it's much less than one instruction */
+
+    /* CY7C4XX_WRITE_N_PORT |= 1 << CY7C4XX_WRITE_N_BIT; */
+    /* CY7C4XX_MASTER_RESET_N_PORT &= ~(1 << CY7C4XX_MASTER_RESET_N_BIT); */
+
+    while (!(CY7C4XX_READ_N_PORT & (1<<CY7C4XX_READ_N_BIT)));
+    CY7C4XX_MASTER_RESET_N_PORT |= 1 << CY7C4XX_MASTER_RESET_N_BIT;
+    CY7C4XX_FIFO_READY_PORT |= 1 << CY7C4XX_FIFO_READY_BIT;
 }
 
 static inline int cy7c4xx_push_one(unsigned char c)
 {
-    while (!(CY7C4XX_REMOTE_CPU_READY_PORT & (1<<CY7C4XX_REMOTE_CPU_READY_BIT))
-            && !(CY7C4XX_FULL_N_PORT & (1<<CY7C4XX_FULL_N_BIT)));
+    while (!(CY7C4XX_FULL_N_PORT & (1<<CY7C4XX_FULL_N_BIT)));
 
     CY7C4XX_PORT = c;
     CY7C4XX_WRITE_N_PORT &= ~(1 << CY7C4XX_WRITE_N_BIT);
-    /* asm volatile ("nop"); */
     CY7C4XX_WRITE_N_PORT |= 1 << CY7C4XX_WRITE_N_BIT;
-    /* asm volatile ("nop"); */
 
     return 0;
 }

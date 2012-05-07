@@ -97,14 +97,14 @@
 #define VAL_PORTE 0xFF
 
 #if defined(CY7C4XX)
-/*        PF7  PF6  PF5  PF4  CCR  RCR  /W   /FF
- *        IN   IN   IN   IN   OUT  IN   OUT  IN
- * DDRF   0    0    0    0    1    0    1    0
- *        PU   PU   PU   PU   VAL  PU   VAL  PU
- * PORTF  1    1    1    1    1    1    1    1
+/*        PF7  PF6  PF5  /MR  FR   /R   /W   /FF
+ *        IN   IN   IN   OUT  OUT  IN   OUT  IN
+ * DDRF   0    0    0    1    1    0    1    0
+ *        PU   PU   PU   VAL  VAL  PU   VAL  PU
+ * PORTF  1    1    1    0    0    0    1    1
  */
-#define VAL_DDRF  0x0A
-#define VAL_PORTF 0xFF
+#define VAL_DDRF  0x1A
+#define VAL_PORTF 0xE3
 #else
 /*        PF7  PF6  PF5  PF4  PF3  PF2  PF1  PF0
  *        IN   IN   IN   IN   IN   IN   IN   IN
@@ -174,11 +174,14 @@
 #if defined(CY7C4XX)
 #define CY7C4XX_PORT PORTA
 
-#define CY7C4XX_CURRENT_CPU_READY_PORT PORTF
-#define CY7C4XX_CURRENT_CPU_READY_BIT  3
+#define CY7C4XX_MASTER_RESET_N_PORT    PORTF
+#define CY7C4XX_MASTER_RESET_N_BIT     4
 
-#define CY7C4XX_REMOTE_CPU_READY_PORT  PINF
-#define CY7C4XX_REMOTE_CPU_READY_BIT   2
+#define CY7C4XX_FIFO_READY_PORT        PORTF
+#define CY7C4XX_FIFO_READY_BIT         3
+
+#define CY7C4XX_READ_N_PORT            PINF
+#define CY7C4XX_READ_N_BIT             2
 
 #define CY7C4XX_WRITE_N_PORT           PORTF
 #define CY7C4XX_WRITE_N_BIT            1
