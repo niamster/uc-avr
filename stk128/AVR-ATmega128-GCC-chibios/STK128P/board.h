@@ -59,7 +59,7 @@
 #define VAL_PORTA 0xFF
 #endif
 
-/*        OC2  PB6  PB5  PB4  K4   K3   K2  K1
+/*        OC2  PB6  PB5  PB4  K4   K3   K2   K1
  *        OUT  IN   IN   IN   IN   IN   IN   IN
  * DDRB   1    0    0    0    0    0    0    0
  *        VAL  PU   PU   PU   PU   PU   PU   PU

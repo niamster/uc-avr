@@ -47,6 +47,7 @@
 #endif
 
 #if !defined(__DOXYGEN__)
+/* OC2/PB7 */
 extern PWMDriver PWMD2;
 #endif
 
