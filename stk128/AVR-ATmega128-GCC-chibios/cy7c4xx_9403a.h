@@ -18,18 +18,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CY7C4XX_H_
-#define _CY7C4XX_H_
+#ifndef _CY7C4XX_9403A_H_
+#define _CY7C4XX_9403A_H_
 
-#if defined(CY7C4XX)
-void cy7c4xx_init(void);
+#if defined(CY7C4XX_9403A)
+void cy7c4xx_9403a_init(void);
 
 /* pushes data to fifo
-   defragments if needed
+   fragments if needed
  */
-int cy7c4xx_push(unsigned char *s, int len);
+int fifo_cy7c4xx_push(unsigned char *s, int len);
+
+/* pulls data from fifo */
+int fifo_9403a_pull_one(unsigned char *c);
 #else
-static void cy7c4xx_init(void) {}
+static inline void cy7c4xx_9403a_init(void) {}
 #endif
 
-#endif /* _CY7C4XX_H_ */
+#endif /* _CY7C4XX_9403A_H_ */

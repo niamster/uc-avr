@@ -22,7 +22,7 @@
 #include "hal.h"
 
 #include "iv9.h"
-#include "cy7c4xx.h"
+#include "cy7c4xx_9403a.h"
 
 CH_IRQ_HANDLER(TIMER0_COMP_vect) {
   CH_IRQ_PROLOGUE();
@@ -93,5 +93,5 @@ void boardInit(void) {
   TIMSK  = (1 << OCIE0);                                /* IRQ on compare.  */
 
   iv9_init();
-  cy7c4xx_init();
+  cy7c4xx_9403a_init();
 }

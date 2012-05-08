@@ -40,7 +40,7 @@ void iv9_init(void);
 
 void iv9_show(enum iv9_symbol sym);
 #else
-static void iv9_init(void) {}
+static inline void iv9_init(void) {}
 #endif
 
 #endif /* _IV9_H_ */

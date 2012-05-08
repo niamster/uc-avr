@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "ch.h"
 #include "hal.h"
@@ -29,7 +30,7 @@
 #include "chheap.h"
 
 #include "iv9.h"
-#include "cy7c4xx.h"
+#include "cy7c4xx_9403a.h"
 
 enum g_event {
     G_EVENT_GEN_TMR,
@@ -40,16 +41,18 @@ enum g_event {
 static EvTimer gEvt[G_EVENT_QTY];
 static EventListener gEl[G_EVENT_QTY];
 
+#define printc(c) chIOPut(&SD2, c)
+
 static void print(const char *msgp) {
 
     while (*msgp)
-        chIOPut(&SD2, *msgp++);
+        printc(*msgp++);
 }
 
 static void println(const char *msgp) {
     print(msgp);
-    chIOPut(&SD2, '\r');
-    chIOPut(&SD2, '\n');
+    printc('\r');
+    printc('\n');
 }
 
 void hello(void) {
@@ -162,6 +165,47 @@ static msg_t iv9CntThread(void *arg) {
         for (;period > floor; --period) {
             pwmChangePeriod(&PWMD2, period);
             chThdSleepMilliseconds(10);
+        }
+    }
+
+    return 0;
+}
+#endif
+
+#if defined(CY7C4XX_9403A)
+static int fifo9403aRead = 1;
+static WORKING_AREA(waFifo9403aOutThread, 128+255);
+static msg_t fifo9403aOutThread(void *arg) {
+    uint8_t c = 0;
+    uint8_t len = 0;
+    uint8_t buf[255];
+    uint8_t *b = buf;
+
+    while (TRUE) {
+        if (fifo9403aRead || len) {
+            if (fifo_9403a_pull_one(&c) == 0) {
+                if (len == 0) {
+                    len = c;
+                    b = buf;
+                } else {
+                    *b = c;
+                    ++b;
+                    --len;
+                    if (len == 0) {
+                        int i, l = b-buf;
+                        char t[12];
+                        print("FIFO IN: '");
+                        for (i=0;i<l;++i) {
+                            if (i != 0)
+                                printc(' ');
+                            sprintf(t, "%02x", buf[i]);
+                            print(t);
+                        }
+                        sprintf(t, "' len=%3d", l);
+                        println(t);
+                    }
+                }
+            }
         }
     }
 
@@ -291,14 +335,38 @@ static void cmd_pwm(BaseChannel *chp, int argc, char *argv[]) {
     pwmEnableChannel(&PWMD2, 0, 0);
 }
 
-#if defined(CY7C4XX)
+#if defined(CY7C4XX_9403A)
 static void cmd_cy7c4xx(BaseChannel *chp, int argc, char *argv[]) {
     if (argc != 1) {
         chprintf(chp, "Usage: cy7c4xx [string]\r\n");
         return;
     }
 
-    cy7c4xx_push(argv[0], strlen(argv[0]));
+    fifo_cy7c4xx_push((unsigned char *)argv[0], strlen(argv[0]));
+}
+
+static void cmd_9403a(BaseChannel *chp, int argc, char *argv[]) {
+    unsigned char c = 0;
+
+    if (argc != 1) {
+      usage:
+        chprintf(chp, "Usage: 9403a [oneshot|start|stop]\r\n");
+        return;
+    }
+
+    if (!strcmp(argv[0],"oneshot")) {
+        if (fifo_9403a_pull_one(&c) == 0) {
+            chprintf(chp, "Got: 0x%02x\r\n", c);
+        } else {
+            chprintf(chp, "9403a fifo empty\r\n");
+        }
+    } else if (!strcmp(argv[0],"start")) {
+        fifo9403aRead = 1;
+    } else if (!strcmp(argv[0],"stop")) {
+        fifo9403aRead = 0;
+    } else {
+        goto usage;
+    }
 }
 #endif
 
@@ -306,8 +374,9 @@ static const ShellCommand shCmds[] = {
     {"mem", cmd_mem},
     {"threads", cmd_threads},
     {"pwm", cmd_pwm},
-#if defined(CY7C4XX)
+#if defined(CY7C4XX_9403A)
     {"cy7c4xx", cmd_cy7c4xx},
+    {"9403a", cmd_9403a},
 #endif
     {NULL, NULL}
 };
@@ -356,6 +425,9 @@ int main(int argc, char **argv) {
     chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 #if defined(IV9)
     chThdCreateStatic(waIv9CntThread, sizeof(waIvCntThread), HIGHPRIO, iv9CntThread, NULL);
+#endif
+#if defined(CY7C4XX_9403A)
+    chThdCreateStatic(waFifo9403aOutThread, sizeof(waFifo9403aOutThread), NORMALPRIO, fifo9403aOutThread, NULL);
 #endif
 
     /* Starts the event on generic timer. */

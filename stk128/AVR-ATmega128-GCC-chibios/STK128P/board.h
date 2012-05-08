@@ -39,7 +39,7 @@
  */
 #define VAL_DDRA  0xFF
 #define VAL_PORTA 0xFF
-#elif defined(CY7C4XX)
+#elif defined(CY7C4XX_9403A)
 /*        D7   D6   D5   D4   D3   D2   D1   D0
  *        OUT  OUT  OUT  OUT  OUT  OUT  OUT  OUT
  * DDRA   1    1    1    1    1    1    1    1
@@ -77,6 +77,16 @@
 #define VAL_DDRC  0xFF
 #define VAL_PORTC 0xFF
 
+#if defined(CY7C4XX_9403A)
+/*        Q3   Q2   Q1   Q0   TXD  RXD  IT1  IT0
+ *        IN   IN   IN   IN   OUT  IN   x    x
+ * DDRD   0    0    0    0    1    0    0    0
+ *        HiZ  HiZ  HiZ  HiZ  VAL  HiZ  x    x
+ * PORTD  0    0    0    0    1    0    0    0
+ */
+#define VAL_DDRD  0x08
+#define VAL_PORTD 0x08
+#else
 /*        PD7  PD6  PD5  PD4  TXD  RXD  IT1  IT0
  *        IN   IN   IN   IN   OUT  IN   x    x
  * DDRD   0    0    0    0    1    0    0    0
@@ -85,7 +95,7 @@
  */
 #define VAL_DDRD  0x08
 #define VAL_PORTD 0xF8
-
+#endif
 
 /*        PE7  PE6  PE5  PE4  PE3  PE2  PE1  PE0
  *        IN   IN   IN   IN   IN   IN   IN   IN
@@ -96,15 +106,15 @@
 #define VAL_DDRE  0x00
 #define VAL_PORTE 0xFF
 
-#if defined(CY7C4XX)
+#if defined(CY7C4XX_9403A)
 /*        PF7  PF6  PF5  /MR  FR   /R   /W   /FF
  *        IN   IN   IN   OUT  OUT  IN   OUT  IN
  * DDRF   0    0    0    1    1    0    1    0
- *        PU   PU   PU   VAL  VAL  PU   VAL  PU
- * PORTF  1    1    1    0    0    0    1    1
+ *        PU   PU   PU   VAL  VAL  HiZ  VAL  HiZ
+ * PORTF  1    1    1    0    0    0    1    0
  */
 #define VAL_DDRF  0x1A
-#define VAL_PORTF 0xE3
+#define VAL_PORTF 0xE2
 #else
 /*        PF7  PF6  PF5  PF4  PF3  PF2  PF1  PF0
  *        IN   IN   IN   IN   IN   IN   IN   IN
@@ -116,6 +126,16 @@
 #define VAL_PORTF 0xFF
 #endif
 
+#if defined(CY7C4XX_9403A)
+/*        x    x    x    x    PG3  PG2  /ORE TOP
+ *        x    x    x    x    IN   IN   IN   OUT
+ * DDRG   0    0    0    0    0    0    0    1
+ *        x    x    x    x    PU   PU   HiZ  OUT
+ * PORTG  0    0    0    0    1    1    0    0
+ */
+#define VAL_DDRG  0x01
+#define VAL_PORTG 0x0C
+#else
 /*        x    x    x    x    PG3  PG2  PG1  PG0
  *        x    x    x    x    IN   IN   IN   IN
  * DDRG   0    0    0    0    0    0    0    0
@@ -124,6 +144,7 @@
  */
 #define VAL_DDRG  0x00
 #define VAL_PORTG 0x0F
+#endif
 
 #define BTN_K1                   (1<<0)
 #define BTN_K2                   (1<<1)
@@ -171,29 +192,37 @@
 #define IV9_DIRECT_CONNECTION
 #endif
 
-#if defined(CY7C4XX)
-#define CY7C4XX_PORT PORTA
+#if defined(CY7C4XX_9403A)
+#define FIFO_9403_ORE_N_PORT         PING
+#define FIFO_9403_ORE_N_BIT          1
 
-#define CY7C4XX_MASTER_RESET_N_PORT    PORTF
-#define CY7C4XX_MASTER_RESET_N_BIT     4
+#define FIFO_9403_TOP_PORT           PORTG
+#define FIFO_9403_TOP_BIT            0
 
-#define CY7C4XX_FIFO_READY_PORT        PORTF
-#define CY7C4XX_FIFO_READY_BIT         3
+#define FIFO_9403_PORT               PIND
+#define FIFO_9403_PORT_MASK          0xf0
+#define FIFO_9403_PORT_SHIFT         4
 
-#define CY7C4XX_READ_N_PORT            PINF
-#define CY7C4XX_READ_N_BIT             2
+#define FIFOS_MASTER_RESET_N_PORT    PORTF
+#define FIFOS_MASTER_RESET_N_BIT     4
 
-#define CY7C4XX_WRITE_N_PORT           PORTF
-#define CY7C4XX_WRITE_N_BIT            1
+#define FIFOS_READY_PORT             PORTF
+#define FIFOS_READY_BIT              3
 
-#define CY7C4XX_FULL_N_PORT            PINF
-#define CY7C4XX_FULL_N_BIT             0
+#define FIFO_CY7C4XX_PORT PORTA
+
+#define FIFO_CY7C4XX_READ_N_PORT     PINF
+#define FIFO_CY7C4XX_READ_N_BIT      2
+
+#define FIFO_CY7C4XX_WRITE_N_PORT    PORTF
+#define FIFO_CY7C4XX_WRITE_N_BIT     1
+
+#define FIFO_CY7C4XX_FULL_N_PORT     PINF
+#define FIFO_CY7C4XX_FULL_N_BIT      0
 #endif
 
-#if defined(CY7C4XX) && defined(IV9)
-#if (CY7C4XX_PORT == IV9_PORT)
-#error "CY7C4XX_PORT == IV9_PORT"
-#endif
+#if defined(CY7C4XX_9403A) && defined(IV9)
+#error "CY7C4XX and IV9 could not be used together"
 #endif
 
 #if !defined(_FROM_ASM_)

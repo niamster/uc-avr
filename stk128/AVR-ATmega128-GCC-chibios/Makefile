@@ -101,7 +101,7 @@ SRC =	$(PORTSRC) \
 		$(CHIBIOS)/os/various/evtimer.c \
 		$(CHIBIOS)/os/various/shell.c \
 		$(CHIBIOS)/os/various/chprintf.c \
-		main.c iv9.c cy7c4xx.c pwm_lld.c
+		main.c iv9.c cy7c4xx_9403a.c pwm_lld.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -167,9 +167,9 @@ ifeq ($(IV9), 1)
 CDEFS += -DIV9
 endif
 
-CY7C4XX ?= 0
-ifeq ($(CY7C4XX), 1)
-CDEFS += -DCY7C4XX
+CY7C4XX_9403A ?= 0
+ifeq ($(CY7C4XX_9403A), 1)
+CDEFS += -DCY7C4XX_9403A
 endif
 
 #---------------- Compiler Options C ----------------
