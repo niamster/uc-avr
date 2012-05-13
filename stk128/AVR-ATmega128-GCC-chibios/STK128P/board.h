@@ -97,7 +97,7 @@
 #define VAL_PORTD 0xF8
 #endif
 
-/*        PE7  PE6  PE5  PE4  PE3  PE2  PE1  PE0
+/*        VW  PE6  PE5  PE4  PE3  PE2  PE1  PE0
  *        IN   IN   IN   IN   IN   IN   IN   IN
  * DDRE   0    0    0    0    0    0    0    0
  *        PU   PU   PU   PU   PU   PU   PU   PU
@@ -224,6 +224,9 @@
 #if defined(CY7C4XX_9403A) && defined(IV9)
 #error "CY7C4XX and IV9 could not be used together"
 #endif
+
+#define VW_DIN_PORT     PINE
+#define VW_DIN_BIT      7
 
 #if !defined(_FROM_ASM_)
 #ifdef __cplusplus

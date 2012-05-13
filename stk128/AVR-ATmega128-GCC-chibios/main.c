@@ -31,6 +31,7 @@
 
 #include "iv9.h"
 #include "cy7c4xx_9403a.h"
+#include "vw/VirtualWire.h"
 
 enum g_event {
     G_EVENT_GEN_TMR,
@@ -381,6 +382,39 @@ static const ShellCommand shCmds[] = {
     {NULL, NULL}
 };
 
+static WORKING_AREA(waVwThread, 128);
+static msg_t vWThread(void *arg) {
+    uint8_t len = 0;
+    uint8_t buf[VW_MAX_MESSAGE_LEN];
+    uint8_t ok, i;
+    char t[16];
+
+    vw_setup(1200);
+    vw_rx_start();
+
+    println("VW RX started");
+
+    while (TRUE) {
+        len = VW_MAX_MESSAGE_LEN;
+        if (!vw_have_message())
+            continue;
+
+        ok = vw_get_message(buf, &len);
+        print("VW IN: '");
+        for (i=0;i<len;++i) {
+            if (i != 0)
+                printc(' ');
+            sprintf(t, "%02x", buf[i]);
+            print(t);
+        }
+        sprintf(t, "' len=%3d, ok=%d", len, ok);
+        println(t);
+    }
+
+    return 0;
+}
+
+
 static const ShellConfig shCfg = {
     (BaseChannel *)&SD2,
     shCmds
@@ -429,6 +463,7 @@ int main(int argc, char **argv) {
 #if defined(CY7C4XX_9403A)
     chThdCreateStatic(waFifo9403aOutThread, sizeof(waFifo9403aOutThread), NORMALPRIO, fifo9403aOutThread, NULL);
 #endif
+    chThdCreateStatic(waVwThread, sizeof(waVwThread), NORMALPRIO, vWThread, NULL);
 
     /* Starts the event on generic timer. */
     evtStart(&gEvt[G_EVENT_GEN_TMR]);

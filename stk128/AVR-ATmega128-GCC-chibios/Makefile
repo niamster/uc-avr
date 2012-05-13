@@ -89,7 +89,7 @@ include $(CHIBIOS)/os/ports/GCC/AVR/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
 #include $(CHIBIOS)/test/test.mk
 
-VPATH = $(ROOT)/$(BOARD):$(CHIBIOS)/os/ports/GCC/AVR:$(CHIBIOS)/os/kernel/src:$(CHIBIOS)/os/hal/src:$(CHIBIOS)/os/hal/platforms/AVR:$(CHIBIOS)/os/various:$(CHIBIOS)/test:
+VPATH = $(ROOT)/$(BOARD):$(CHIBIOS)/os/ports/GCC/AVR:$(CHIBIOS)/os/kernel/src:$(CHIBIOS)/os/hal/src:$(CHIBIOS)/os/hal/platforms/AVR:$(CHIBIOS)/os/various:$(CHIBIOS)/test:$(ROOT)/vw:
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC =	$(PORTSRC) \
@@ -101,7 +101,7 @@ SRC =	$(PORTSRC) \
 		$(CHIBIOS)/os/various/evtimer.c \
 		$(CHIBIOS)/os/various/shell.c \
 		$(CHIBIOS)/os/various/chprintf.c \
-		main.c iv9.c cy7c4xx_9403a.c pwm_lld.c
+		main.c iv9.c cy7c4xx_9403a.c pwm_lld.c vw/VirtualWire.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
