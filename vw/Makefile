@@ -14,7 +14,15 @@ CFLAGS  += -I./
 
 LDFLAGS := -gc-sections
 
-VPATH = uart:sh:vw:
+EXT_LIB := /projects/avr
+
+UART    := $(EXT_LIB)/uart
+SH      := $(EXT_LIB)/sh
+
+CFLAGS  += -I$(EXT_LIB)
+CFLAGS  += -I$(EXT_LIB)
+
+VPATH = vw:$(UART):$(SH):
 
 OBJDIR ?= obj
 OUTDIR ?= out

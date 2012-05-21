@@ -1,5 +1,3 @@
-/** Shell based on freertos Command Interpreter
- */
 #include <string.h>
 
 #include "uart/uart.h"
@@ -16,7 +14,11 @@ static struct shCmd *shRegisteredCmd = &shHelpCmd;
 
 void shCmdRegisterCmd(struct shCmd *shCmd)
 {
-    shRegisteredCmd->next = shCmd;
+    struct shCmd *last = shRegisteredCmd;
+
+    while (last->next)
+        last = last->next;
+    last->next = shCmd;
 }
 
 static void shHelp(int argc, char **argv)
@@ -24,12 +26,12 @@ static void shHelp(int argc, char **argv)
     struct shCmd *cmd = shRegisteredCmd;
 
     while (cmd) {
-        usart_write(cmd->cmd, strlen(cmd->cmd));
+        usart_puts(cmd->cmd);
         cmd = cmd->next;
         if (cmd)
             usart_putc(' ');
     }
-    usart_write("\r\n", 2);
+    usart_puts("\r\n");
 }
 
 void shProcessCmd(unsigned char *input, int len)
@@ -83,11 +85,8 @@ void shProcessCmd(unsigned char *input, int len)
         cmd = cmd->next;
     }
 
-    {
-        static const char s[] = "Unknown command. List of registered commands: ";
-        usart_write(s, sizeof(s)-1);
-        shHelp(0, NULL);
-    }
+    usart_puts("Unknown command. List of registered commands: ");
+    shHelp(0, NULL);
 }
 
 void shProcessUart(void)
@@ -98,11 +97,11 @@ void shProcessUart(void)
     static unsigned char first = 1;
 
     if (first) {
-        usart_write("\r\n>", 3);
+        usart_puts("\r\n>");
         first = 0;
     }
 
-    if (usart_buffer_poll()) {
+    if (usart_bytes_available() > 0) {
         usart_read(pCmd, 1);
         if (*pCmd == 0x08) {
             if (len > 0) {

@@ -1,6 +1,3 @@
-/** Shell based on freertos Command Interpreter
- */
-
 #ifndef _SH_H_
 #define _SH_H_
 

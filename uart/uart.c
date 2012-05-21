@@ -4,8 +4,6 @@
 
 #include <string.h>
 
-#define INTERRUPT_DRIVEN
-
 #ifdef INTERRUPT_DRIVEN
 #define USART_BUFFER_SIZE      16
 #define USART_BUFFER_SIZE_MASK (USART_BUFFER_SIZE-1)
@@ -65,15 +63,16 @@ int usart_read(unsigned char *buf, int max)
 #endif
 }
 
-char usart_buffer_poll(void)
+int usart_bytes_available(void)
 {
 #ifdef INTERRUPT_DRIVEN
-	return (usart_buffer_head != usart_buffer_tail);
+	return (usart_buffer_tail - usart_buffer_head) & USART_BUFFER_SIZE_MASK;
 #else
-	return UCSRA & (1<<RXC);
+	return (UCSRA & (1<<RXC))?1:0;
 #endif
 }
 
+inline
 void usart_putc(unsigned char c)
 {
     while (!(UCSRA & (1<<UDRE))); // wait for buffer to be empty
@@ -86,21 +85,24 @@ void usart_putc(unsigned char c)
 void usart_write(const unsigned char *data, int len)
 {
 	int i;
+
 	for (i=0; i<len; i++)
         usart_putc(data[i]);
-
-	/* while (!(UCSRA & (1<<TXC))); // wait for complete transfer */
 }
 
-unsigned char usart_wait_byte(void)
+void usart_puts(unsigned char *data)
 {
-	unsigned char c;
+    while (*data) {
+        usart_putc(*data);
+        ++data;
+    }
+}
 
-    while (!usart_buffer_poll());
+void usart_getc(unsigned char *c)
+{
+    while (usart_bytes_available() == 0);
 
-    usart_read(&c, 1);
-
-    return c;
+    usart_read(c, 1);
 }
 
 void usart_init(void)
