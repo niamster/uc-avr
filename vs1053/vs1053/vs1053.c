@@ -448,7 +448,7 @@ void vs1053_play_sine(uint8_t pitch)
 
     vs1053_wait_data_request();
 
-    vs1053_enable_cs();
+    vs1053_enable_dcs();
 
 #if !defined(VS1053_SPI_TRANSACTIONS)
     spi_write(0x53);
@@ -468,5 +468,5 @@ void vs1053_play_sine(uint8_t pitch)
     }
 #endif
 
-    vs1053_disable_cs();
+    vs1053_disable_dcs();
 }
