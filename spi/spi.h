@@ -29,6 +29,25 @@ void spi_disable(void);
 void spi_interrupt_enable(void);
 void spi_interrupt_disable(void);
 
+static inline spi_clk_div_t
+spi_speed_to_clkdiv(uint32_t speed)
+{
+    if (F_CPU/speed <= 2)
+        return SPI_CLK_DIV2;
+    else if (F_CPU/speed <= 4)
+        return SPI_CLK_DIV4;
+    else if (F_CPU/speed <= 8)
+        return SPI_CLK_DIV8;
+    else if (F_CPU/speed <= 16)
+        return SPI_CLK_DIV16;
+    else if (F_CPU/speed <= 32)
+        return SPI_CLK_DIV32;
+    else if (F_CPU/speed <= 64)
+        return SPI_CLK_DIV64;
+    else
+        return SPI_CLK_DIV128;
+}
+
 void spi_setup(spi_mode_t mode, spi_clk_div_t clk_div, spi_bit_order_t bit_order);
 
 typedef struct spi_transfer {
