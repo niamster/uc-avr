@@ -10,6 +10,7 @@ CFLAGS  :=
 CFLAGS  += -O2
 CFLAGS  += -DF_CPU=$(F_CPU) -DBAUD=$(BAUD)
 CFLAGS  += -ffunction-sections -fdata-sections
+CFLAGS  += -D__OPTIMIZE__
 CFLAGS  += -I./
 
 LDFLAGS := -gc-sections

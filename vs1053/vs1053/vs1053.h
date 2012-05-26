@@ -27,7 +27,7 @@ enum vs1053_sci_reg_mode {
     VS1053_SCI_REG_MODE_DIFF,
     VS1053_SCI_REG_MODE_LAYER12,
     VS1053_SCI_REG_MODE_RESET,
-    VS1053_SCI_REG_MODE_OUTOFWAV,
+    VS1053_SCI_REG_MODE_CANCEL,
     VS1053_SCI_REG_MODE_EARSPEAKER_LO,
     VS1053_SCI_REG_MODE_TESTS,
     VS1053_SCI_REG_MODE_STREAM,
@@ -37,19 +37,19 @@ enum vs1053_sci_reg_mode {
     VS1053_SCI_REG_MODE_SDISHARE,
     VS1053_SCI_REG_MODE_SDINEW,
     VS1053_SCI_REG_MODE_ADPCM,
-    VS1053_SCI_REG_MODE_ADCPM_HP,
-    VS1053_SCI_REG_MODE_LINE_IN,
+    VS1053_SCI_REG_MODE_RESERVED,
+    VS1053_SCI_REG_MODE_LINE1,
     VS1053_SCI_REG_MODE_CLK_RANGE,
 };
 
 void vs1053_setup(void);
 
-void vs1053_write_register(vs1053_sci_reg_t reg, unsigned int value);
-void vs1053_read_register(vs1053_sci_reg_t reg, unsigned int *value);
+void vs1053_write_register(vs1053_sci_reg_t reg, uint16_t value);
+void vs1053_read_register(vs1053_sci_reg_t reg, uint16_t *value);
 
-void vs1053_play(const unsigned char *data, unsigned int len);
-void vs1053_play_progmem(const unsigned char *data, unsigned int len);
+void vs1053_play(const uint8_t *data, uint16_t len);
+void vs1053_play_progmem(const uint8_t *data, uint16_t len);
 
-void vs1053_play_sine(unsigned char pitch);
+void vs1053_play_sine(uint8_t pitch);
 
 #endif
