@@ -1,7 +1,7 @@
 #ifndef _UART_H_
 #define _UART_H_
 
-#define INTERRUPT_DRIVEN
+#define UART_INTERRUPT_DRIVEN
 
 int usart_read(unsigned char *buf, int max);
 void usart_write(const unsigned char *data, int len);

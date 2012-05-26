@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-#ifdef INTERRUPT_DRIVEN
+#ifdef UART_INTERRUPT_DRIVEN
 #define USART_BUFFER_SIZE      16
 #define USART_BUFFER_SIZE_MASK (USART_BUFFER_SIZE-1)
 
@@ -31,7 +31,7 @@ SIGNAL(USART_RXC_vect)
 
 int usart_read(unsigned char *buf, int max)
 {
-#ifdef INTERRUPT_DRIVEN
+#ifdef UART_INTERRUPT_DRIVEN
     unsigned char head, tail;
     unsigned char p = 0;
 
@@ -65,7 +65,7 @@ int usart_read(unsigned char *buf, int max)
 
 int usart_bytes_available(void)
 {
-#ifdef INTERRUPT_DRIVEN
+#ifdef UART_INTERRUPT_DRIVEN
 	return (usart_buffer_tail - usart_buffer_head) & USART_BUFFER_SIZE_MASK;
 #else
 	return (UCSRA & (1<<RXC))?1:0;
@@ -115,7 +115,7 @@ void usart_init(void)
 #else
     UCSRA &= ~(1 << U2X);
 #endif
-#ifdef INTERRUPT_DRIVEN
+#ifdef UART_INTERRUPT_DRIVEN
 	UCSRB = (1 << RXEN)|(1 << TXEN)|(1 << RXCIE);
 #else
     UCSRB = (1 << RXEN)|(1 << TXEN);
