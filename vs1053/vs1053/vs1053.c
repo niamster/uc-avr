@@ -423,6 +423,24 @@ void vs1053_play(const uint8_t *data, uint16_t len)
     }
 }
 
+void vs1053_set_volume(idBm_t left, idBm_t right)
+{
+    /* volume register = -dBm/-0.5 */
+    uint16_t vol;
+
+    if (left > 0xFE/2)
+        vol = 0xFE << 8;
+    else
+        vol = left << (1+8);
+
+    if (right > 0xFE/2)
+        vol |= 0xFE;
+    else
+        vol |= right << 1;
+
+    vs1053_write_register(VS1053_SCI_REG_VOL, vol);
+}
+
 void vs1053_play_sine(uint8_t pitch)
 {
     vs1053_write_register(VS1053_SCI_REG_MODE,

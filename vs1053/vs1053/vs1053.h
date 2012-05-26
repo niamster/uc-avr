@@ -42,6 +42,9 @@ enum vs1053_sci_reg_mode {
     VS1053_SCI_REG_MODE_CLK_RANGE,
 };
 
+/* dBm below 0 */
+typedef uint16_t idBm_t;
+
 void vs1053_setup(void);
 
 void vs1053_write_register(vs1053_sci_reg_t reg, uint16_t value);
@@ -49,6 +52,8 @@ void vs1053_read_register(vs1053_sci_reg_t reg, uint16_t *value);
 
 void vs1053_play(const uint8_t *data, uint16_t len);
 void vs1053_play_progmem(const uint8_t *data, uint16_t len);
+
+void vs1053_set_volume(idBm_t left, idBm_t right);
 
 void vs1053_play_sine(uint8_t pitch);
 

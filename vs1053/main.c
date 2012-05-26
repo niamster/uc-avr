@@ -230,6 +230,26 @@ static struct shCmd shSineCmd = {
     .next = NULL
 };
 
+static void shVol(int argc, char **argv)
+{
+    idBm_t left, right;
+
+    if (argc != 2)
+        usart_puts("usage: vol [left] [right]");
+    else {
+        left = atoi(argv[0]);
+        right = atoi(argv[1]);
+    }
+
+    vs1053_set_volume(left, right);
+}
+
+static struct shCmd shVolCmd = {
+	.cmd  = "vol",
+	.cbk  = shVol,
+    .next = NULL
+};
+
 int main(void)
 {
     usart_init();
@@ -238,6 +258,7 @@ int main(void)
     shCmdRegisterCmd(&shPlayCmd);
     shCmdRegisterCmd(&shRegsCmd);
     shCmdRegisterCmd(&shSineCmd);
+    shCmdRegisterCmd(&shVolCmd);
 
     sei();
 
