@@ -12,7 +12,7 @@ CFLAGS  += -DF_CPU=$(F_CPU) -DBAUD=$(BAUD)
 CFLAGS  += -ffunction-sections -fdata-sections
 CFLAGS  += -I./
 
-LDFLAGS := -gc-sections
+LDFLAGS := -Wl,-gc-sections
 
 EXT_LIB := /projects/avr
 

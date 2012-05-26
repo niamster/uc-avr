@@ -13,7 +13,7 @@ CFLAGS  += -ffunction-sections -fdata-sections
 CFLAGS  += -D__OPTIMIZE__
 CFLAGS  += -I./
 
-LDFLAGS := -gc-sections
+LDFLAGS := -Wl,-gc-sections
 
 EXT_LIB := /projects/avr
 
