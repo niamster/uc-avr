@@ -50,8 +50,8 @@ void spi_disable(void)
 
 void spi_setup(spi_mode_t mode, spi_clk_div_t clk_div, spi_bit_order_t bit_order)
 {
-    unsigned char spcr = SPCR & ~(SPI_SPCR_MODE_MASK | SPI_SPCR_CLOCK_MASK | SPI_SPCR_ORDER_MASK);
-    unsigned char spsr = SPSR & ~SPI_SPSR_2XCLOCK_MASK;
+    uint8_t spcr = SPCR & ~(SPI_SPCR_MODE_MASK | SPI_SPCR_CLOCK_MASK | SPI_SPCR_ORDER_MASK);
+    uint8_t spsr = SPSR & ~SPI_SPSR_2XCLOCK_MASK;
 
     if (bit_order == SPI_BIT_ORDER_LSB_FIRST)
         spcr |= _BV(DORD);
@@ -76,8 +76,8 @@ void spi_interrupt_disable(void)
 
 void spi_transfer(spi_transfer_t *xfer)
 {
-    unsigned char c;
-    unsigned int i;
+    uint8_t c;
+    uint16_t i;
 
     for (i=0;i<xfer->len;++i) {
         if (xfer->out)
@@ -95,9 +95,9 @@ void spi_transfer(spi_transfer_t *xfer)
     }
 }
 
-void spi_write(unsigned char out)
+void spi_write(uint8_t out)
 {
-    unsigned char c;
+    uint8_t c;
 
     SPDR = out;
 
@@ -107,7 +107,7 @@ void spi_write(unsigned char out)
     c;
 }
 
-void spi_read(unsigned char *in)
+void spi_read(uint8_t *in)
 {
     SPDR = 0xFF;
 

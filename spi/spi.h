@@ -51,14 +51,14 @@ spi_speed_to_clkdiv(uint32_t speed)
 void spi_setup(spi_mode_t mode, spi_clk_div_t clk_div, spi_bit_order_t bit_order);
 
 typedef struct spi_transfer {
-    unsigned char *in;
-    const unsigned char *out;
-    unsigned int len;
+    uint8_t *in;
+    const uint8_t *out;
+    uint16_t len;
 } spi_transfer_t;
 
 void spi_transfer(spi_transfer_t *xfer);
 
-void spi_write(unsigned char out);
-void spi_read(unsigned char *in);
+void spi_write(uint8_t out);
+void spi_read(uint8_t *in);
 
 #endif
