@@ -24,6 +24,35 @@
 #define SPI_SS_PORT     PORTB
 #define SPI_SS_BIT      4
 
+static uint8_t spi_async_xfer_complete = 1;
+static spi_transfer_t *spi_async_xfer;
+static uint16_t spi_async_xfer_idx;
+
+SIGNAL(SPI_STC_vect)
+{
+    uint8_t c;
+    spi_transfer_t *xfer = spi_async_xfer;
+
+    if (xfer->in)
+        xfer->in[spi_async_xfer_idx] = SPDR;
+    else
+        c = SPDR; // clean SPIF
+    c;
+
+    ++spi_async_xfer_idx;
+
+    if (spi_async_xfer_idx == xfer->len) {
+        spi_async_xfer_complete = 1;
+        SPCR &= ~_BV(SPIE);
+    } else {
+        if (xfer->out)
+            SPDR = xfer->out[spi_async_xfer_idx];
+        else
+            SPDR = 0xFF;
+
+    }
+}
+
 void spi_enable(void)
 {
     /* MOSI, SCK and SS must be output, all others input */
@@ -64,14 +93,26 @@ void spi_setup(spi_mode_t mode, spi_clk_div_t clk_div, spi_bit_order_t bit_order
     SPSR = spsr;
 }
 
-void spi_interrupt_enable(void)
+void spi_transfer_async(spi_transfer_t *xfer)
 {
+    if (!xfer->len)
+        return;
+
+    spi_async_xfer = xfer;
+    spi_async_xfer_complete = 0;
+    spi_async_xfer_idx = 0;
+
+    if (xfer->out)
+        SPDR = xfer->out[0];
+    else
+        SPDR = 0xFF;
+
     SPCR |= _BV(SPIE);
 }
 
-void spi_interrupt_disable(void)
+uint8_t spi_async_transfer_complete(void)
 {
-    SPCR &= ~_BV(SPIE);
+    return spi_async_xfer_complete;
 }
 
 void spi_transfer(spi_transfer_t *xfer)

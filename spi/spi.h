@@ -26,9 +26,6 @@ typedef enum spi_clk_div {      /* Fosc divider */
 void spi_enable(void);
 void spi_disable(void);
 
-void spi_interrupt_enable(void);
-void spi_interrupt_disable(void);
-
 static inline spi_clk_div_t
 spi_speed_to_clkdiv(uint32_t speed)
 {
@@ -57,6 +54,9 @@ typedef struct spi_transfer {
 } spi_transfer_t;
 
 void spi_transfer(spi_transfer_t *xfer);
+
+void spi_transfer_async(spi_transfer_t *xfer);
+uint8_t spi_async_transfer_complete(void);
 
 void spi_write(uint8_t out);
 void spi_read(uint8_t *in);
