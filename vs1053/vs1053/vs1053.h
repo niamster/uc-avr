@@ -45,13 +45,21 @@ enum vs1053_sci_reg_mode {
 /* dBm below 0 */
 typedef uint16_t idBm_t;
 
+/** Callback function used to provide audio data
+ *  data and len refer to a portion of audio data
+ *  priv is opaque pointer to calee private data
+ *  return 1 if that was the last portion of data to play, 0 otherwise
+ */
+typedef uint8_t (*vs1053_audio_feeder_t)(uint8_t **data, uint16_t *len, void *priv);
+
 void vs1053_setup(void);
 
 void vs1053_write_register(vs1053_sci_reg_t reg, uint16_t value);
 void vs1053_read_register(vs1053_sci_reg_t reg, uint16_t *value);
 
-void vs1053_play(const uint8_t *data, uint16_t len);
-void vs1053_play_progmem(const uint8_t *data, uint16_t len);
+void vs1053_play(vs1053_audio_feeder_t feeder, void *priv);
+void vs1053_play_ram(const uint8_t *data, uint16_t len);
+void vs1053_play_pgm(const uint8_t *data, uint16_t len);
 
 void vs1053_set_volume(idBm_t left, idBm_t right);
 

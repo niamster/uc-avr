@@ -607,25 +607,31 @@ static void vs1053_push_byte(uint8_t b, uint16_t count)
     }
 }
 
-void vs1053_play_progmem(const uint8_t *data, uint16_t len)
+void vs1053_play(vs1053_audio_feeder_t feeder, void *priv)
 {
-    uint8_t c[VS1053_DATA_CHUNK_SIZE];
-    uint8_t sent;
+    uint8_t *data;
+    uint16_t len;
     uint16_t efb;
+    uint8_t l, last;
 
     vs1053_enable_dcs();
 
-    while (len) {
-        uint8_t l = min(len, VS1053_DATA_CHUNK_SIZE);
+    for (;;) {
+        last = feeder(&data, &len, priv);
 
-        memcpy_P(c, data, l);
+        while (len) {
+            l = min(len, VS1053_DATA_CHUNK_SIZE);
 
-        vs1053_wait_data_request();
+            vs1053_wait_data_request();
 
-        vs1053_push_chunk(c, l);
+            vs1053_push_chunk(data, l);
 
-        len -= l;
-        data += l;
+            len -= l;
+            data += l;
+        }
+
+        if (last)
+            break;
     }
 
     vs1053_disable_dcs();
@@ -639,7 +645,7 @@ void vs1053_play_progmem(const uint8_t *data, uint16_t len)
     vs1053_write_register(VS1053_SCI_REG_MODE,
             VS1053_MODE_REG_VALUE | (1<<VS1053_SCI_REG_MODE_CANCEL));
 
-    sent = 0;
+    l = 0;
     for (;;) {
         uint16_t mode;
 
@@ -652,62 +658,64 @@ void vs1053_play_progmem(const uint8_t *data, uint16_t len)
         if (!(mode&(1<<VS1053_SCI_REG_MODE_CANCEL)))
             break;
 
-        sent += 32;
-        if (sent >= 2048/32) {
+        l += 32;
+        if (l >= 2048/32) {
             vs1053_soft_reset();
             break;
         }
     }
 }
 
-void vs1053_play(const uint8_t *data, uint16_t len)
+struct vs1053_pgm_feeder_priv {
+    const uint8_t *data;
+    uint16_t len;
+    uint8_t buffer[VS1053_DATA_CHUNK_SIZE];
+};
+
+static uint8_t vs1053_pgm_feeder(uint8_t **data, uint16_t *len, void *priv)
 {
-    uint8_t sent;
-    uint16_t efb;
+    struct vs1053_pgm_feeder_priv *p = priv;
+    uint8_t l = min(p->len, VS1053_DATA_CHUNK_SIZE);
 
-    vs1053_enable_dcs();
+    memcpy_P(p->buffer, p->data, l);
 
-    while (len) {
-        uint8_t l = min(len, VS1053_DATA_CHUNK_SIZE);
+    p->data += l;
+    p->len -= l;
 
-        vs1053_wait_data_request();
+    *data = p->buffer;
+    *len = l;
 
-        vs1053_push_chunk(data, l);
+    return (p->len == 0);
+}
 
-        len -= l;
-        data += l;
-    }
+void vs1053_play_pgm(const uint8_t *data, uint16_t len)
+{
+    struct vs1053_pgm_feeder_priv p = {.data = data, .len = len};
 
-    vs1053_disable_dcs();
+    vs1053_play(vs1053_pgm_feeder, &p);
+}
 
-    vs1053_read_ram(VS1053_PARAMETRIC_ENDFILLBYTE_ADDRESS, 1, &efb);
+struct vs1053_ram_feeder_priv {
+    const uint8_t *data;
+    uint16_t len;
+    uint8_t buffer[VS1053_DATA_CHUNK_SIZE];
+};
 
-    vs1053_enable_dcs();
-    vs1053_push_byte(efb, 2052);
-    vs1053_disable_dcs();
+static uint8_t vs1053_ram_feeder(uint8_t **data, uint16_t *len, void *priv)
+{
+    struct vs1053_pgm_feeder_priv *p = priv;
 
-    vs1053_write_register(VS1053_SCI_REG_MODE,
-            VS1053_MODE_REG_VALUE | (1<<VS1053_SCI_REG_MODE_CANCEL));
+    *data = (uint8_t *)p->data;
+    *len = p->len;
 
-    sent = 0;
-    for (;;) {
-        uint16_t mode;
+    return 1;
+}
 
-        vs1053_enable_dcs();
-        vs1053_push_byte(efb, 32);
-        vs1053_disable_dcs();
+void vs1053_play_ram(const uint8_t *data, uint16_t len)
+{
+    struct vs1053_ram_feeder_priv p = {.data = data, .len = len};
 
-        vs1053_read_register(VS1053_SCI_REG_MODE, &mode);
-
-        if (!(mode&(1<<VS1053_SCI_REG_MODE_CANCEL)))
-            break;
-
-        sent += 32;
-        if (sent >= 2048/32) {
-            vs1053_soft_reset();
-            break;
-        }
-    }
+    vs1053_play(vs1053_ram_feeder, &p);
 }
 
 void vs1053_set_volume(idBm_t left, idBm_t right)

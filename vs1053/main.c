@@ -184,7 +184,7 @@ static void shPlay(int argc, char **argv)
     usart_puts(buf);
 
     for (i=0;i<times;++i)
-        vs1053_play_progmem(demo_mp3, sizeof(demo_mp3));
+        vs1053_play_pgm(demo_mp3, sizeof(demo_mp3));
 
     usart_puts("done\r\n");
 }
