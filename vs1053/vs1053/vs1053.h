@@ -45,12 +45,21 @@ enum vs1053_sci_reg_mode {
 /* dBm below 0 */
 typedef uint16_t idBm_t;
 
+typedef enum vs1053_feeder_status {
+    VS1053_FEEDER_STATUS_CONTINUE,
+    VS1053_FEEDER_STATUS_LAST,
+    VS1053_FEEDER_STATUS_CANCEL,
+} vs1053_feeder_status_t;
+
 /** Callback function used to provide audio data
  *  data and len refer to a portion of audio data
  *  priv is opaque pointer to calee private data
- *  return 1 if that was the last portion of data to play, 0 otherwise
+ *
+ *  If VS1053_FEEDER_STATUS_CANCEL is returned,
+ *  the caller may still require to call feader with
+ *  valid data output
  */
-typedef uint8_t (*vs1053_audio_feeder_t)(uint8_t **data, uint16_t *len, void *priv);
+typedef vs1053_feeder_status_t (*vs1053_audio_feeder_t)(uint8_t **data, uint16_t *len, void *priv);
 
 void vs1053_setup(void);
 

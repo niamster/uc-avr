@@ -612,12 +612,14 @@ void vs1053_play(vs1053_audio_feeder_t feeder, void *priv)
     uint8_t *data;
     uint16_t len;
     uint16_t efb;
-    uint8_t l, last;
+    uint8_t l, deadlock = 0, canceling = 0;
+    vs1053_feeder_status_t status;
 
     vs1053_enable_dcs();
 
     for (;;) {
-        last = feeder(&data, &len, priv);
+      feed:
+        status = feeder(&data, &len, priv);
 
         while (len) {
             l = min(len, VS1053_DATA_CHUNK_SIZE);
@@ -628,12 +630,42 @@ void vs1053_play(vs1053_audio_feeder_t feeder, void *priv)
 
             len -= l;
             data += l;
+
+            if (canceling) {
+                uint16_t mode;
+
+                vs1053_disable_dcs();
+                vs1053_read_register(VS1053_SCI_REG_MODE, &mode);
+                vs1053_enable_dcs();
+
+                if (!(mode&(1<<VS1053_SCI_REG_MODE_CANCEL)))
+                    goto playback_end;
+
+                deadlock += l;
+                if (deadlock >= 2048/32) {
+                    vs1053_disable_dcs();
+                    vs1053_soft_reset();
+                    return;
+                }
+
+                if (!len)
+                    goto feed;
+            }
         }
 
-        if (last)
+        if (status == VS1053_FEEDER_STATUS_LAST)
             break;
+        else if (status == VS1053_FEEDER_STATUS_CONTINUE)
+            continue;
+        else if (status == VS1053_FEEDER_STATUS_CANCEL) {
+            vs1053_write_register(VS1053_SCI_REG_MODE,
+                    VS1053_MODE_REG_VALUE | (1<<VS1053_SCI_REG_MODE_CANCEL));
+
+            canceling = 1;
+        }
     }
 
+  playback_end:
     vs1053_disable_dcs();
 
     vs1053_read_ram(VS1053_PARAMETRIC_ENDFILLBYTE_ADDRESS, 1, &efb);
@@ -642,10 +674,13 @@ void vs1053_play(vs1053_audio_feeder_t feeder, void *priv)
     vs1053_push_byte(efb, 2052);
     vs1053_disable_dcs();
 
+    if (canceling)
+        return;
+
     vs1053_write_register(VS1053_SCI_REG_MODE,
             VS1053_MODE_REG_VALUE | (1<<VS1053_SCI_REG_MODE_CANCEL));
 
-    l = 0;
+    deadlock = 0;
     for (;;) {
         uint16_t mode;
 
@@ -658,8 +693,8 @@ void vs1053_play(vs1053_audio_feeder_t feeder, void *priv)
         if (!(mode&(1<<VS1053_SCI_REG_MODE_CANCEL)))
             break;
 
-        l += 32;
-        if (l >= 2048/32) {
+        deadlock += 32;
+        if (deadlock >= 2048/32) {
             vs1053_soft_reset();
             break;
         }
@@ -672,7 +707,8 @@ struct vs1053_pgm_feeder_priv {
     uint8_t buffer[VS1053_DATA_CHUNK_SIZE];
 };
 
-static uint8_t vs1053_pgm_feeder(uint8_t **data, uint16_t *len, void *priv)
+static vs1053_feeder_status_t
+vs1053_pgm_feeder(uint8_t **data, uint16_t *len, void *priv)
 {
     struct vs1053_pgm_feeder_priv *p = priv;
     uint8_t l = min(p->len, VS1053_DATA_CHUNK_SIZE);
@@ -685,7 +721,7 @@ static uint8_t vs1053_pgm_feeder(uint8_t **data, uint16_t *len, void *priv)
     *data = p->buffer;
     *len = l;
 
-    return (p->len == 0);
+    return (p->len == 0)?VS1053_FEEDER_STATUS_LAST:VS1053_FEEDER_STATUS_CONTINUE;
 }
 
 void vs1053_play_pgm(const uint8_t *data, uint16_t len)
@@ -701,14 +737,15 @@ struct vs1053_ram_feeder_priv {
     uint8_t buffer[VS1053_DATA_CHUNK_SIZE];
 };
 
-static uint8_t vs1053_ram_feeder(uint8_t **data, uint16_t *len, void *priv)
+static vs1053_feeder_status_t
+vs1053_ram_feeder(uint8_t **data, uint16_t *len, void *priv)
 {
     struct vs1053_pgm_feeder_priv *p = priv;
 
     *data = (uint8_t *)p->data;
     *len = p->len;
 
-    return 1;
+    return VS1053_FEEDER_STATUS_LAST;
 }
 
 void vs1053_play_ram(const uint8_t *data, uint16_t len)

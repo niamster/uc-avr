@@ -192,7 +192,59 @@ static void shPlay(int argc, char **argv)
 static struct shCmd shPlayCmd = {
 	.cmd  = "play",
 	.cbk  = shPlay,
-    .next = NULL
+};
+
+#define BUFFER_SIZE 32
+
+struct pgm_feeder_priv {
+    const uint8_t *data;
+    uint16_t len;
+    uint8_t buffer[BUFFER_SIZE];
+};
+
+static vs1053_feeder_status_t
+pgm_feeder(uint8_t **data, uint16_t *len, void *priv)
+{
+    struct pgm_feeder_priv *p = priv;
+    #ifndef min
+    #define min(a,b) ((a) < (b) ? (a) : (b))
+    #endif
+    uint8_t l = min(p->len, BUFFER_SIZE);
+
+    sprintf(p->buffer, "Fed %d bytes(%s)\r\n", l, (p->len-l == 0)?"l":"c");
+    usart_puts(p->buffer);
+
+    memcpy_P(p->buffer, p->data, l);
+
+    p->data += l;
+    p->len -= l;
+
+    *data = p->buffer;
+    *len = l;
+
+    if (p->len <= sizeof(demo_mp3)/4) {
+        static uint8_t display = 1;
+        if (display) {
+            usart_puts("canceling\r\n");
+            display = 0;
+        }
+        return VS1053_FEEDER_STATUS_CANCEL;
+    }
+
+    return (p->len == 0)?VS1053_FEEDER_STATUS_LAST:VS1053_FEEDER_STATUS_CONTINUE;
+}
+
+static void shCancelTest(int argc, char **argv)
+{
+    struct pgm_feeder_priv p = {.data = demo_mp3, .len = sizeof(demo_mp3)};
+
+    usart_puts("Cancel test\r\n");
+    vs1053_play(pgm_feeder, &p);
+}
+
+static struct shCmd shCancelTestCmd = {
+	.cmd  = "ct",
+	.cbk  = shCancelTest,
 };
 
 static void shRegs(int argc, char **argv)
@@ -211,7 +263,6 @@ static void shRegs(int argc, char **argv)
 static struct shCmd shRegsCmd = {
 	.cmd  = "regs",
 	.cbk  = shRegs,
-    .next = NULL
 };
 
 static void shSine(int argc, char **argv)
@@ -227,7 +278,6 @@ static void shSine(int argc, char **argv)
 static struct shCmd shSineCmd = {
 	.cmd  = "sine",
 	.cbk  = shSine,
-    .next = NULL
 };
 
 static void shVol(int argc, char **argv)
@@ -247,7 +297,6 @@ static void shVol(int argc, char **argv)
 static struct shCmd shVolCmd = {
 	.cmd  = "vol",
 	.cbk  = shVol,
-    .next = NULL
 };
 
 int main(void)
@@ -256,6 +305,7 @@ int main(void)
     vs1053_setup();
 
     shCmdRegisterCmd(&shPlayCmd);
+    shCmdRegisterCmd(&shCancelTestCmd);
     shCmdRegisterCmd(&shRegsCmd);
     shCmdRegisterCmd(&shSineCmd);
     shCmdRegisterCmd(&shVolCmd);
