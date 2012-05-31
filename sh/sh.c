@@ -14,11 +14,10 @@ static struct shCmd *shRegisteredCmd = &shHelpCmd;
 
 void shCmdRegisterCmd(struct shCmd *shCmd)
 {
-    struct shCmd *last = shRegisteredCmd;
+    struct shCmd *first = shRegisteredCmd;
 
-    while (last->next)
-        last = last->next;
-    last->next = shCmd;
+    shCmd->next = first->next;
+    first->next = shCmd;
 }
 
 static void shHelp(int argc, char **argv)
@@ -91,7 +90,7 @@ void shProcessCmd(unsigned char *input, int len)
 
 void shProcessUart(void)
 {
-    static unsigned char cmd[128];
+    static unsigned char cmd[SH_MAX_CMD_LEN];
     static unsigned char *pCmd = cmd;
     static unsigned char len = 0;
     static unsigned char first = 1;

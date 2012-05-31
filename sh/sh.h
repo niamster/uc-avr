@@ -1,14 +1,15 @@
 #ifndef _SH_H_
 #define _SH_H_
 
-#define SH_MAX_ARGS 10
+#define SH_MAX_ARGS    4
+#define SH_MAX_CMD_LEN 32
 
 /* The structure that defines command line commands.  A command line command
 should be defined by declaring a const structure of this type. */
 struct shCmd {
-	const unsigned char * const cmd;           /* Command name, case sensitive */
-	void (*cbk)(int argc, char **argv);  /* Callback function. */
-    struct shCmd *next;                        /* Pointer to next command */
+	const unsigned char * const cmd;     /* Command name, case sensitive */
+	void (*cbk)(int argc, char **argv);  /* Callback function */
+    struct shCmd *next;                  /* Pointer to next command */
 };
 
 /*
