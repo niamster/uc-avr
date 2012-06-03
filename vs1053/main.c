@@ -190,11 +190,7 @@ static void shPlay(int argc, char **argv)
 
     usart_puts("done\r\n");
 }
-
-static struct shCmd shPlayCmd = {
-	.cmd  = "play",
-	.cbk  = shPlay,
-};
+SH_DECLARE_CMD("play", shPlay);
 
 #define BUFFER_SIZE 32
 
@@ -243,11 +239,7 @@ static void shCancelTest(int argc, char **argv)
     usart_puts("Cancel test\r\n");
     vs1053_play(pgm_feeder, &p);
 }
-
-static struct shCmd shCancelTestCmd = {
-	.cmd  = "ct",
-	.cbk  = shCancelTest,
-};
+SH_DECLARE_CMD("ct", shCancelTest);
 
 static void shRegs(int argc, char **argv)
 {
@@ -261,11 +253,7 @@ static void shRegs(int argc, char **argv)
         usart_puts(buf);
     }
 }
-
-static struct shCmd shRegsCmd = {
-	.cmd  = "regs",
-	.cbk  = shRegs,
-};
+SH_DECLARE_CMD("regs", shRegs);
 
 static void shSine(int argc, char **argv)
 {
@@ -276,11 +264,7 @@ static void shSine(int argc, char **argv)
 
     vs1053_play_sine(pitch);
 }
-
-static struct shCmd shSineCmd = {
-	.cmd  = "sine",
-	.cbk  = shSine,
-};
+SH_DECLARE_CMD("sine", shSine);
 
 static void shVol(int argc, char **argv)
 {
@@ -296,12 +280,7 @@ static void shVol(int argc, char **argv)
 
     vs1053_set_volume(left, right);
 }
-
-static struct shCmd shVolCmd = {
-	.cmd  = "vol",
-	.cbk  = shVol,
-};
-
+SH_DECLARE_CMD("vol", shVol);
 
 static void shDate(int argc, char **argv)
 {
@@ -310,25 +289,14 @@ static void shDate(int argc, char **argv)
     sprintf(buf, "%lu ms\r\n", wclock_jiffies_to_msec(jiffies));
     usart_puts(buf);
 }
-
-static struct shCmd shDateCmd = {
-	.cmd  = "date",
-	.cbk  = shDate,
-};
+SH_DECLARE_CMD("date", shDate);
 
 int main(void)
 {
     sei();
 
-    shRegisterCmd(&shPlayCmd);
-    shRegisterCmd(&shCancelTestCmd);
-    shRegisterCmd(&shRegsCmd);
-    shRegisterCmd(&shSineCmd);
-    shRegisterCmd(&shVolCmd);
-    shRegisterCmd(&shDateCmd);
-
     for (;;) {
-        shProcessUart();
+        sh_process_uart();
     }
 
     return 0;

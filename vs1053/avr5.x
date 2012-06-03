@@ -149,12 +149,14 @@ SECTIONS
   .data	  : AT (ADDR (.text) + SIZEOF (.text))
   {
      PROVIDE (__data_start = .) ;
-    . = ALIGN(2);
     PROVIDE (__mi_start = .) ;
     *(.mi*)
     KEEP (*(.mi*))
-    . = ALIGN(2);
     PROVIDE (__mi_end = .) ;
+    PROVIDE (__sh_start = .) ;
+    *(.sh*)
+    KEEP (*(.sh*))
+    PROVIDE (__sh_end = .) ;
     *(.data)
     *(.data*)
     *(.rodata)  /* We need to include .rodata here if gcc is used */

@@ -5,27 +5,39 @@
 
 #include <uart/uart.h>
 #include <sh/sh.h>
+#include <mi/mi.h>
 
-static void shHelp(int argc, char **argv);
-static struct shCmd shHelpCmd = {
+static void sh_help(int argc, char **argv);
+static struct sh_cmd sh_help_cmd = {
 	"help",
-	shHelp,
+	sh_help,
     NULL
 };
 
-static struct shCmd *shRegisteredCmd = &shHelpCmd;
+static struct sh_cmd *sh_registered_cmd = &sh_help_cmd;
 
-void shRegisterCmd(struct shCmd *shCmd)
+extern struct sh_cmd __sh_start[], __sh_end[];
+
+static
+void sh_init(void)
 {
-    struct shCmd *first = shRegisteredCmd;
+    struct sh_cmd *first = sh_registered_cmd;
+    struct sh_cmd *s = __sh_start;
+    struct sh_cmd *e = __sh_end;
 
-    shCmd->next = first->next;
-    first->next = shCmd;
+    while (s < e) {
+        s->next = first->next;
+        first->next = s;
+        ++s;
+    }
+
+    usart_puts("\r\n>");
 }
+MI_INIT_MODULE(999, sh_init);
 
-static void shHelp(int argc, char **argv)
+static void sh_help(int argc, char **argv)
 {
-    struct shCmd *cmd = shRegisteredCmd;
+    struct sh_cmd *cmd = sh_registered_cmd;
 
     while (cmd) {
         usart_puts(cmd->cmd);
@@ -36,11 +48,11 @@ static void shHelp(int argc, char **argv)
     usart_puts("\r\n");
 }
 
-void shProcessCmd(unsigned char *input, int len)
+void sh_process_cmd(unsigned char *input, int len)
 {
     char *argv[SH_MAX_ARGS+1];
     int argc = 0;
-    struct shCmd *cmd = shRegisteredCmd;
+    struct sh_cmd *cmd = sh_registered_cmd;
 
     while (cmd) {
         int l = strlen(cmd->cmd);
@@ -88,20 +100,14 @@ void shProcessCmd(unsigned char *input, int len)
     }
 
     usart_puts("Unknown command. List of registered commands: ");
-    shHelp(0, NULL);
+    sh_help(0, NULL);
 }
 
-void shProcessUart(void)
+void sh_process_uart(void)
 {
     static unsigned char cmd[SH_MAX_CMD_LEN];
     static unsigned char *pCmd = cmd;
     static unsigned char len = 0;
-    static unsigned char first = 1;
-
-    if (first) {
-        usart_puts("\r\n>");
-        first = 0;
-    }
 
     if (usart_bytes_available() > 0) {
         usart_read(pCmd, 1);
@@ -125,7 +131,7 @@ void shProcessUart(void)
         if (*(pCmd-1) == '\r') {
             usart_putc('\n');
             if (len > 1) {
-                shProcessCmd(cmd, len-1);
+                sh_process_cmd(cmd, len-1);
             }
             usart_putc('>');
             pCmd = cmd;
