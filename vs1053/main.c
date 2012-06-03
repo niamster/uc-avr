@@ -318,6 +318,7 @@ static struct shCmd shDateCmd = {
 
 int main(void)
 {
+    wclock_init();
     usart_init();
     vs1053_setup();
 
@@ -328,6 +329,7 @@ int main(void)
     shRegisterCmd(&shRegsCmd);
     shRegisterCmd(&shSineCmd);
     shRegisterCmd(&shVolCmd);
+    shRegisterCmd(&shDateCmd);
 
     for (;;) {
         shProcessUart();
