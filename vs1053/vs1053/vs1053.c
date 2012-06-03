@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vs1053/vs1053.h"
-#include "spi/spi.h"
+#include <vs1053/vs1053.h>
+#include <spi/spi.h>
+#include <mi/mi.h>
 
 #if 0
 static const uint8_t vs1053_patch_v1_95[] PROGMEM = {
@@ -519,7 +520,8 @@ static void vs1053_load_patch(const uint8_t *patch, uint16_t size)
     }
 }
 
-void vs1053_setup(void)
+static
+void vs1053_init(void)
 {
     VS1053_XRES_DDR  |= 1 << VS1053_XRES_BIT;
     VS1053_XRES_PORT &= ~(1 << VS1053_XRES_BIT);
@@ -573,6 +575,8 @@ void vs1053_setup(void)
     spi_setup(SPI_MODE0, spi_speed_to_clkdiv((VS1053_CLKI_SPEED_KHZ*1000UL)/7UL), SPI_BIT_ORDER_MSB_FIRST);
 #endif
 }
+
+MI_INIT_MODULE(0, vs1053_init);
 
 static inline
 void vs1053_push_chunk(const uint8_t *data, uint8_t len)

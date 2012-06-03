@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include <mi/mi.h>
+
 volatile uint32_t jiffies = 0;
 
 SIGNAL(TIMER0_COMP_vect)
@@ -33,6 +35,7 @@ SIGNAL(TIMER0_COMP_vect)
 #error CPU is not supported
 #endif
 
+static
 void wclock_init(void)
 {
   TCCR0  = (1 << WGM01) | (0 << WGM00) | /* CTC mode        */
@@ -46,3 +49,4 @@ void wclock_init(void)
   TIMSK  = (1 << OCIE0);  /* IRQ on compare */
 }
 
+MI_INIT_MODULE(0, wclock_init);

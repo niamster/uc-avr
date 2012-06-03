@@ -318,10 +318,6 @@ static struct shCmd shDateCmd = {
 
 int main(void)
 {
-    wclock_init();
-    usart_init();
-    vs1053_setup();
-
     sei();
 
     shRegisterCmd(&shPlayCmd);

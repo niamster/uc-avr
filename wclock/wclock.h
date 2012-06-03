@@ -7,8 +7,6 @@
 
 extern volatile uint32_t jiffies;
 
-void wclock_init(void);
-
 static inline uint32_t
 wclock_jiffies_to_msec(uint32_t j)
 {

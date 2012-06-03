@@ -4,6 +4,8 @@
 
 #include <string.h>
 
+#include <mi/mi.h>
+
 #ifdef INTERRUPT_DRIVEN
 #define USART_BUFFER_SIZE      16
 #define USART_BUFFER_SIZE_MASK (USART_BUFFER_SIZE-1)
@@ -105,6 +107,7 @@ void usart_getc(uint8_t *c)
     usart_read(c, 1);
 }
 
+static
 void usart_init(void)
 {
     UBRRH = UBRRH_VALUE;
@@ -122,3 +125,5 @@ void usart_init(void)
 #endif
 	UCSRC = (1 << URSEL)|(1 << UCSZ1)|(1 << UCSZ0);
 }
+
+MI_INIT_MODULE(0, usart_init);

@@ -3,8 +3,8 @@
 #include <inttypes.h>
 #include <ctype.h>
 
-#include "uart/uart.h"
-#include "sh/sh.h"
+#include <uart/uart.h>
+#include <sh/sh.h>
 
 static void shHelp(int argc, char **argv);
 static struct shCmd shHelpCmd = {

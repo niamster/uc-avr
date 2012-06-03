@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-#include "spi/spi.h"
+#include <spi/spi.h>
 
 #define SPI_SPCR_MODE_MASK    0x0C  // CPOL = bit 3, CPHA = bit 2
 #define SPI_SPCR_CLOCK_MASK   0x03  // SPR1 = bit 1, SPR0 = bit 0

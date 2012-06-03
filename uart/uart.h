@@ -3,6 +3,8 @@
 
 #define UART_INTERRUPT_DRIVEN
 
+/* boud rate is defined by BAUD preprocessor definition */
+
 int usart_read(uint8_t *buf, int max);
 void usart_write(const uint8_t *data, int len);
 
@@ -12,8 +14,5 @@ void usart_getc(const uint8_t *c);
 
 /* returns available bytes in buffer */
 int usart_bytes_available(void);
-
-/* boud rate is defined by BAUD preprocessor definition */
-void usart_init(void);
 
 #endif

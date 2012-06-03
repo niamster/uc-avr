@@ -14,7 +14,7 @@ CFLAGS  += -D__OPTIMIZE__
 CFLAGS  += -DWCLOCK_FREQUENCY=1000UL
 CFLAGS  += -I./
 
-LDFLAGS := -Wl,-gc-sections
+LDFLAGS := -Wl,-gc-sections -Tavr5.x
 
 EXT_LIB := /projects/avr
 
@@ -31,6 +31,7 @@ include ../uart/uart.mk
 include ../sh/sh.mk
 include ../spi/spi.mk
 include ../wclock/wclock.mk
+include ../mi/mi.mk
 
 OBJ = $(SRC:%.c=$(OBJDIR)/%.o)
 

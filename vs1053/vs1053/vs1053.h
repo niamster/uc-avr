@@ -61,8 +61,6 @@ typedef enum vs1053_feeder_status {
  */
 typedef vs1053_feeder_status_t (*vs1053_audio_feeder_t)(uint8_t **data, uint16_t *len, void *priv);
 
-void vs1053_setup(void);
-
 void vs1053_write_register(vs1053_sci_reg_t reg, uint16_t value);
 void vs1053_read_register(vs1053_sci_reg_t reg, uint16_t *value);
 
