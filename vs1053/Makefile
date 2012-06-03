@@ -18,18 +18,20 @@ LDFLAGS := -Wl,-gc-sections
 
 EXT_LIB := /projects/avr
 
-UART    := $(EXT_LIB)/uart
-SH      := $(EXT_LIB)/sh
-SPI     := $(EXT_LIB)/spi
-WCLOCK  := $(EXT_LIB)/wclock
-
 CFLAGS  += -I$(EXT_LIB)
 
-VPATH = vs1053:$(UART):$(SH):$(SPI):$(WCLOCK):
+VPATH   := vs1053:
 
-OBJDIR ?= obj
-OUTDIR ?= out
-SRC = main.c vs1053.c spi.c uart.c sh.c wclock.c
+OBJDIR  ?= obj
+OUTDIR  ?= out
+
+SRC	    := main.c vs1053.c
+
+include ../uart/uart.mk
+include ../sh/sh.mk
+include ../spi/spi.mk
+include ../wclock/wclock.mk
+
 OBJ = $(SRC:%.c=$(OBJDIR)/%.o)
 
 # Create object files directory
