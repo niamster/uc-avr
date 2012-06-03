@@ -1,4 +1,7 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
+
+#include <inttypes.h>
 
 #include "spi/spi.h"
 
@@ -33,11 +36,10 @@ SIGNAL(SPI_STC_vect)
     uint8_t c;
     spi_transfer_t *xfer = spi_async_xfer;
 
+    c = SPDR; // clean SPIF
+
     if (xfer->in)
-        xfer->in[spi_async_xfer_idx] = SPDR;
-    else
-        c = SPDR; // clean SPIF
-    c;
+        xfer->in[spi_async_xfer_idx] = c;
 
     ++spi_async_xfer_idx;
 
@@ -49,7 +51,6 @@ SIGNAL(SPI_STC_vect)
             SPDR = xfer->out[spi_async_xfer_idx];
         else
             SPDR = 0xFF;
-
     }
 }
 
@@ -128,11 +129,10 @@ void spi_transfer(spi_transfer_t *xfer)
 
         while (!(SPSR & _BV(SPIF)));
 
+        c = SPDR; // clean SPIF
+
         if (xfer->in)
-            xfer->in[i] = SPDR;
-        else
-            c = SPDR; // clean SPIF
-        c;
+            xfer->in[i] = c;
     }
 }
 
@@ -145,7 +145,7 @@ void spi_write(uint8_t out)
     while (!(SPSR & _BV(SPIF)));
 
     c = SPDR; // clean SPIF
-    c;
+    (void)c;
 }
 
 void spi_read(uint8_t *in)

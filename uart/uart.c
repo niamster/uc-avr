@@ -4,13 +4,13 @@
 
 #include <string.h>
 
-#ifdef UART_INTERRUPT_DRIVEN
+#ifdef INTERRUPT_DRIVEN
 #define USART_BUFFER_SIZE      16
 #define USART_BUFFER_SIZE_MASK (USART_BUFFER_SIZE-1)
 
-static unsigned char usart_buffer[USART_BUFFER_SIZE];
-static unsigned char usart_buffer_head = 0;
-static unsigned char usart_buffer_tail = 0;
+static uint8_t usart_buffer[USART_BUFFER_SIZE];
+static uint8_t usart_buffer_head = 0;
+static uint8_t usart_buffer_tail = 0;
 
 SIGNAL(USART_RXC_vect)
 {
@@ -23,17 +23,17 @@ SIGNAL(USART_RXC_vect)
         ++usart_buffer_tail;
         usart_buffer_tail &= USART_BUFFER_SIZE_MASK;
     } else { // drop
-        unsigned char c = UDR;
+        uint8_t c = UDR;
         c;
     }
 }
 #endif
 
-int usart_read(unsigned char *buf, int max)
+int usart_read(uint8_t *buf, int max)
 {
-#ifdef UART_INTERRUPT_DRIVEN
-    unsigned char head, tail;
-    unsigned char p = 0;
+#ifdef INTERRUPT_DRIVEN
+    uint8_t head, tail;
+    uint8_t p = 0;
 
 	cli();
     head = usart_buffer_head;
@@ -65,7 +65,7 @@ int usart_read(unsigned char *buf, int max)
 
 int usart_bytes_available(void)
 {
-#ifdef UART_INTERRUPT_DRIVEN
+#ifdef INTERRUPT_DRIVEN
 	return (usart_buffer_tail - usart_buffer_head) & USART_BUFFER_SIZE_MASK;
 #else
 	return (UCSRA & (1<<RXC))?1:0;
@@ -73,7 +73,7 @@ int usart_bytes_available(void)
 }
 
 inline
-void usart_putc(unsigned char c)
+void usart_putc(uint8_t c)
 {
     while (!(UCSRA & (1<<UDRE))); // wait for buffer to be empty
 
@@ -82,7 +82,7 @@ void usart_putc(unsigned char c)
 	/* while (!(UCSRA & (1<<TXC))); // wait for complete transfer */
 }
 
-void usart_write(const unsigned char *data, int len)
+void usart_write(const uint8_t *data, int len)
 {
 	int i;
 
@@ -90,7 +90,7 @@ void usart_write(const unsigned char *data, int len)
         usart_putc(data[i]);
 }
 
-void usart_puts(unsigned char *data)
+void usart_puts(const uint8_t *data)
 {
     while (*data) {
         usart_putc(*data);
@@ -98,7 +98,7 @@ void usart_puts(unsigned char *data)
     }
 }
 
-void usart_getc(unsigned char *c)
+void usart_getc(uint8_t *c)
 {
     while (usart_bytes_available() == 0);
 
@@ -115,7 +115,7 @@ void usart_init(void)
 #else
     UCSRA &= ~(1 << U2X);
 #endif
-#ifdef UART_INTERRUPT_DRIVEN
+#ifdef INTERRUPT_DRIVEN
 	UCSRB = (1 << RXEN)|(1 << TXEN)|(1 << RXCIE);
 #else
     UCSRB = (1 << RXEN)|(1 << TXEN);

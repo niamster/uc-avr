@@ -1,5 +1,8 @@
 #include <string.h>
 
+#include <inttypes.h>
+#include <ctype.h>
+
 #include "uart/uart.h"
 #include "sh/sh.h"
 
@@ -12,7 +15,7 @@ static struct shCmd shHelpCmd = {
 
 static struct shCmd *shRegisteredCmd = &shHelpCmd;
 
-void shCmdRegisterCmd(struct shCmd *shCmd)
+void shRegisterCmd(struct shCmd *shCmd)
 {
     struct shCmd *first = shRegisteredCmd;
 

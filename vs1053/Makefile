@@ -5,12 +5,13 @@ SIZE := avr-size
 F_CPU := 16000000UL
 BAUD  := 38400
 
-CFLAGS  :=
+CFLAGS  := -Wall -Wno-pointer-sign -Wno-unused-function
 #CFLAGS  += -mint8
 CFLAGS  += -O2
 CFLAGS  += -DF_CPU=$(F_CPU) -DBAUD=$(BAUD)
 CFLAGS  += -ffunction-sections -fdata-sections
 CFLAGS  += -D__OPTIMIZE__
+CFLAGS  += -DWCLOCK_FREQUENCY=1000UL
 CFLAGS  += -I./
 
 LDFLAGS := -Wl,-gc-sections
@@ -20,16 +21,15 @@ EXT_LIB := /projects/avr
 UART    := $(EXT_LIB)/uart
 SH      := $(EXT_LIB)/sh
 SPI     := $(EXT_LIB)/spi
+WCLOCK  := $(EXT_LIB)/wclock
 
 CFLAGS  += -I$(EXT_LIB)
-CFLAGS  += -I$(EXT_LIB)
-CFLAGS  += -I$(EXT_LIB)
 
-VPATH = vs1053:$(UART):$(SH):$(SPI):
+VPATH = vs1053:$(UART):$(SH):$(SPI):$(WCLOCK):
 
 OBJDIR ?= obj
 OUTDIR ?= out
-SRC = main.c vs1053.c spi.c uart.c sh.c
+SRC = main.c vs1053.c spi.c uart.c sh.c wclock.c
 OBJ = $(SRC:%.c=$(OBJDIR)/%.o)
 
 # Create object files directory
@@ -52,3 +52,5 @@ fuses:
 
 clean:
 	rm -rf $(OBJDIR) $(OUTDIR)
+	mkdir $(OBJDIR)
+	mkdir $(OUTDIR)

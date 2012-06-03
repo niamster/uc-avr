@@ -5,10 +5,12 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "vs1053/vs1053.h"
 #include "uart/uart.h"
 #include "sh/sh.h"
+#include "wclock/wclock.h"
 
 static const uint8_t demo_mp3[] PROGMEM = {
   0xFF,0xF2,0x40,0xC0,0x19,0xB7,0x00,0x14,0x02,0xE6,0x5C, /* ..@.......\ */
@@ -284,9 +286,10 @@ static void shVol(int argc, char **argv)
 {
     idBm_t left, right;
 
-    if (argc != 2)
+    if (argc != 2) {
         usart_puts("usage: vol [left] [right]");
-    else {
+        return;
+    } else {
         left = atoi(argv[0]);
         right = atoi(argv[1]);
     }
@@ -299,18 +302,32 @@ static struct shCmd shVolCmd = {
 	.cbk  = shVol,
 };
 
+
+static void shDate(int argc, char **argv)
+{
+    unsigned char buf[16];
+
+    sprintf(buf, "%lu ms\r\n", wclock_jiffies_to_msec(jiffies));
+    usart_puts(buf);
+}
+
+static struct shCmd shDateCmd = {
+	.cmd  = "date",
+	.cbk  = shDate,
+};
+
 int main(void)
 {
     usart_init();
     vs1053_setup();
 
-    shCmdRegisterCmd(&shPlayCmd);
-    shCmdRegisterCmd(&shCancelTestCmd);
-    shCmdRegisterCmd(&shRegsCmd);
-    shCmdRegisterCmd(&shSineCmd);
-    shCmdRegisterCmd(&shVolCmd);
-
     sei();
+
+    shRegisterCmd(&shPlayCmd);
+    shRegisterCmd(&shCancelTestCmd);
+    shRegisterCmd(&shRegsCmd);
+    shRegisterCmd(&shSineCmd);
+    shRegisterCmd(&shVolCmd);
 
     for (;;) {
         shProcessUart();
