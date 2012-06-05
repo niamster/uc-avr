@@ -1,8 +1,6 @@
 #ifndef _UART_H_
 #define _UART_H_
 
-#define UART_INTERRUPT_DRIVEN
-
 /* boud rate is defined by BAUD preprocessor definition */
 
 int usart_read(uint8_t *buf, int max);

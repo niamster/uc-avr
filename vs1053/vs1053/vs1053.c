@@ -9,6 +9,8 @@
 #include <spi/spi.h>
 #include <mi/mi.h>
 
+#include <board.h>
+
 #if 0
 static const uint8_t vs1053_patch_v1_95[] PROGMEM = {
   0x0007, 0x0001, 0x8300, 0x0006, 0x04c2, 0xb080, 0x1402, 0x0fdf, /*    0 */
@@ -269,33 +271,33 @@ static const uint8_t vs1053_ima_patch_v1_0[] PROGMEM = {
 };
 #endif
 
-#define VS1053_XCS_SHARED
-#define VS1053_SPI_TRANSACTIONS
-/* #define VS1053_SPI_HIGHEST_SPEED */
-
-// CLK freq = 12.288MHz[FREQ=0/default] * 3.5[MULT=4] = 43.008MHz
-#define VS1053_CLKI_43008KHZ  0x9800
-
-#define VS1053_CLKI_SPEED_KHZ 43008UL
-
+#if !defined(VS1053_F_CLKI_KHZ)
+#error VS1053 CLKI frequency is not defined
+#endif
+#if !defined(VS1053_F_XTAL_KHZ)
+#error VS1053 XTAL frequency is not defined
+#endif
 #if !defined(VS1053_XCS_SHARED)
-#define VS1053_XDCS_DDR    DDRA
-#define VS1053_XDCS_PORT   PORTA
-#define VS1053_XDCS_BIT    0
+#if !defined(VS1053_XDCS_DEFINED)
+#error VS1053 XDCS port is not defined
+#endif
+#endif
+#if !defined(VS1053_DREQ_DEFINED)
+#error VS1053 DREQ port is not defined
+#endif
+#if !defined(VS1053_XRES_DEFINED)
+#error VS1053 XRES port is not defined
+#endif
+#if !defined(VS1053_XCS_DEFINED)
+#error VS1053 XCS port is not defined
 #endif
 
-#define VS1053_DREQ_DDR    DDRA
-#define VS1053_DREQ_PORT   PINA
-#define VS1053_DREQ_PU     PORTA
-#define VS1053_DREQ_BIT    1
-
-#define VS1053_XRES_DDR    DDRA
-#define VS1053_XRES_PORT   PORTA
-#define VS1053_XRES_BIT    2
-
-#define VS1053_XCS_DDR     DDRA
-#define VS1053_XCS_PORT    PORTA
-#define VS1053_XCS_BIT     3
+#if VS1053_F_XTAL_KHZ == 12288UL
+// CLK freq = 12.288MHz[FREQ=0/default] * 3.5[MULT=4] = 43.008MHz
+#define VS1053_CLKI_43008KHZ  0x9800
+#else
+#error Unsupported VS1053 XTAL frequency
+#endif
 
 #define VS1053_DATA_CHUNK_SIZE 32
 
@@ -360,14 +362,14 @@ static inline void vs1053_wait_data_request(void)
 
 static inline void vs1053_enable_cs(void)
 {
-    _delay_us(2*(1000./(double)VS1053_CLKI_SPEED_KHZ)); // tXCS  : 2 CLKI
+    _delay_us(2*(1000./(double)VS1053_F_CLKI_KHZ)); // tXCS  : 2 CLKI
     VS1053_XCS_PORT &= ~(1 << VS1053_XCS_BIT);
     _delay_us(0.005); // tXCSS : 5 ns
 }
 
 static inline void vs1053_disable_cs(void)
 {
-    _delay_us(1000./(double)VS1053_CLKI_SPEED_KHZ); // tXCSH : 1 CLKI
+    _delay_us(1000./(double)VS1053_F_CLKI_KHZ); // tXCSH : 1 CLKI
     VS1053_XCS_PORT |= 1 << VS1053_XCS_BIT;
 }
 
@@ -558,7 +560,7 @@ void vs1053_init(void)
 #endif
     vs1053_write_register(VS1053_SCI_REG_VOL, 0x0000); /* max vol */
 
-#if VS1053_CLKI_SPEED_KHZ == 43008UL
+#if VS1053_F_CLKI_KHZ == 43008UL
     vs1053_write_register(VS1053_SCI_REG_CLOCKF, VS1053_CLKI_43008KHZ);
 #else
 #error Unsupported VS1053 CLK speed
@@ -572,7 +574,7 @@ void vs1053_init(void)
 
 #if defined(VS1053_SPI_HIGHEST_SPEED)
     // max SDI clock freq is CLKI/7
-    spi_setup(SPI_MODE0, spi_speed_to_clkdiv((VS1053_CLKI_SPEED_KHZ*1000UL)/7UL), SPI_BIT_ORDER_MSB_FIRST);
+    spi_setup(SPI_MODE0, spi_speed_to_clkdiv((VS1053_F_CLKI_KHZ*1000UL)/7UL), SPI_BIT_ORDER_MSB_FIRST);
 #endif
 }
 

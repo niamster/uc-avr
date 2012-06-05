@@ -5,27 +5,30 @@
 
 #include <spi/spi.h>
 
+#include <board.h>
+
+#if defined(__AVR_ATmega16__)
 #define SPI_SPCR_MODE_MASK    0x0C  // CPOL = bit 3, CPHA = bit 2
 #define SPI_SPCR_CLOCK_MASK   0x03  // SPR1 = bit 1, SPR0 = bit 0
 #define SPI_SPCR_ORDER_MASK   0x20  // DORD = bit 5
 
 #define SPI_SPSR_2XCLOCK_MASK 0x01  // SPI2X = bit 0
+#else
+#error Unsupported platform
+#endif
 
-#define SPI_CLK_DDR     DDRB
-#define SPI_CLK_PORT    PORTB
-#define SPI_CLK_BIT     7
-
-#define SPI_MISO_DDR    DDRB
-#define SPI_MISO_PU     PORTB
-#define SPI_MISO_BIT    6
-
-#define SPI_MOSI_DDR    DDRB
-#define SPI_MOSI_PORT   PORTB
-#define SPI_MOSI_BIT    5
-
-#define SPI_SS_DDR      DDRB
-#define SPI_SS_PORT     PORTB
-#define SPI_SS_BIT      4
+#if !defined(SPI_CLK_DEFINED)
+#error SPI CLK port is not defined
+#endif
+#if !defined(SPI_MISO_DEFINED)
+#error SPI MISO port is not defined
+#endif
+#if !defined(SPI_MOSI_DEFINED)
+#error SPI MOSI port is not defined
+#endif
+#if !defined(SPI_SS_DEFINED)
+#error SPI SS port is not defined
+#endif
 
 static uint8_t spi_async_xfer_complete = 1;
 static spi_transfer_t *spi_async_xfer;

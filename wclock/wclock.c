@@ -3,6 +3,11 @@
 
 #include <mi/mi.h>
 
+#if !defined(WCLOCK_FREQUENCY)
+#warning No WCLOCK frequncy defined, using default value=1000
+#define WCLOCK_FREQUENCY 1000
+#endif
+
 volatile uint32_t jiffies = 0;
 
 SIGNAL(TIMER0_COMP_vect)
@@ -32,7 +37,7 @@ SIGNAL(TIMER0_COMP_vect)
 #error WCLOCK frequency is out of range
 #endif
 #else
-#error CPU is not supported
+#error Unsupported platform
 #endif
 
 static

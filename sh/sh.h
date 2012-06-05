@@ -1,9 +1,6 @@
 #ifndef _SH_H_
 #define _SH_H_
 
-#define SH_MAX_ARGS    4
-#define SH_MAX_CMD_LEN 32
-
 /* The structure that defines command line commands.  A command line command
 should be defined by declaring a const structure of this type. */
 struct sh_cmd {

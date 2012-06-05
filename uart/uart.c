@@ -6,7 +6,13 @@
 
 #include <mi/mi.h>
 
-#ifdef INTERRUPT_DRIVEN
+#include <board.h>
+
+#if !defined(UART_RX_INTERRUPT) && !defined(UART_RX_POLL)
+#error UART module is not configured: specify UART RX option: UART_RX_POLL or UART_RX_INTERRUPT
+#endif
+
+#if defined(UART_RX_INTERRUPT)
 #define USART_BUFFER_SIZE      16
 #define USART_BUFFER_SIZE_MASK (USART_BUFFER_SIZE-1)
 
@@ -26,14 +32,14 @@ SIGNAL(USART_RXC_vect)
         usart_buffer_tail &= USART_BUFFER_SIZE_MASK;
     } else { // drop
         uint8_t c = UDR;
-        c;
+        (void)c;
     }
 }
 #endif
 
 int usart_read(uint8_t *buf, int max)
 {
-#ifdef INTERRUPT_DRIVEN
+#if defined(UART_RX_INTERRUPT)
     uint8_t head, tail;
     uint8_t p = 0;
 
@@ -67,7 +73,7 @@ int usart_read(uint8_t *buf, int max)
 
 int usart_bytes_available(void)
 {
-#ifdef INTERRUPT_DRIVEN
+#if defined(UART_RX_INTERRUPT)
 	return (usart_buffer_tail - usart_buffer_head) & USART_BUFFER_SIZE_MASK;
 #else
 	return (UCSRA & (1<<RXC))?1:0;
@@ -118,7 +124,7 @@ void usart_init(void)
 #else
     UCSRA &= ~(1 << U2X);
 #endif
-#ifdef INTERRUPT_DRIVEN
+#if defined(UART_RX_INTERRUPT)
 	UCSRB = (1 << RXEN)|(1 << TXEN)|(1 << RXCIE);
 #else
     UCSRB = (1 << RXEN)|(1 << TXEN);

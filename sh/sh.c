@@ -7,6 +7,15 @@
 #include <sh/sh.h>
 #include <mi/mi.h>
 
+#if !defined(SH_MAX_ARGS)
+#warning No max args defined for SH, using default value=4
+#define SH_MAX_ARGS    4
+#endif
+#if !defined(SH_MAX_CMD_LEN)
+#warning No max CMD len defined for SH, using default value=32
+#define SH_MAX_CMD_LEN 32
+#endif
+
 static void sh_help(int argc, char **argv);
 static struct sh_cmd sh_help_cmd = {
 	"help",

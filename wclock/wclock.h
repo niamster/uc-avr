@@ -1,10 +1,6 @@
 #ifndef _WCLOCK_H_
 #define _WCLOCK_H_
 
-#if !defined(WCLOCK_FREQUENCY)
-#error WCLOCK frequency was not defined
-#endif
-
 extern volatile uint32_t jiffies;
 
 static inline uint32_t
