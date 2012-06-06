@@ -2,7 +2,9 @@ GCC := avr-gcc
 OBJCOPY := avr-objcopy
 SIZE := avr-size
 
+MCU	  := atmega16
 F_CPU := 16000000UL
+
 BAUD  := 38400
 
 CFLAGS  := -Wall -Wno-pointer-sign -Wno-unused-function
@@ -17,7 +19,7 @@ CFLAGS  += -D__OPTIMIZE__
 CFLAGS  += -DWCLOCK_FREQUENCY=1000UL
 CFLAGS  += -I./
 
-LDFLAGS := -Wl,-gc-sections -Tavr5.x
+LDFLAGS := -Wl,-gc-sections -T$$(./avr.ld.sh $(MCU))
 
 EXT_LIB := /projects/avr
 
@@ -43,7 +45,7 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 $(shell mkdir $(OUTDIR) 2>/dev/null)
 
 main: $(OBJ)
-	$(GCC) -g -mmcu=atmega16 $(LDFLAGS) $^ -o $(OUTDIR)/main.elf
+	$(GCC) -g -mmcu=$(MCU) $(LDFLAGS) $^ -o $(OUTDIR)/main.elf
 	$(OBJCOPY) -j .text -j .data -O ihex $(OUTDIR)/main.elf $(OUTDIR)/main.hex
 	$(SIZE) $(OUTDIR)/main.elf
 
