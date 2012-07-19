@@ -9,7 +9,7 @@
 #include <board.h>
 
 #if !defined(UART_RX_INTERRUPT) && !defined(UART_RX_POLL)
-#error UART module is not configured: specify UART RX option: UART_RX_POLL or UART_RX_INTERRUPT
+#error UART module is not configured: specify UART RX option(UART_RX_POLL or UART_RX_INTERRUPT)
 #endif
 
 #if defined(UART_RX_INTERRUPT)
@@ -17,22 +17,18 @@
 #define USART_BUFFER_SIZE_MASK (USART_BUFFER_SIZE-1)
 
 static uint8_t usart_buffer[USART_BUFFER_SIZE];
-static uint8_t usart_buffer_head = 0;
-static uint8_t usart_buffer_tail = 0;
+static uint8_t usart_buffer_rd = 0;
+static uint8_t usart_buffer_wr = 0;
 
 SIGNAL(USART_RXC_vect)
 {
-    /* one element will be always unused
-     * this is the only option to avoid ambiguous situation when both pointers equal and FIFO is full
-     * and keep things simple
-     */
-    if (((usart_buffer_tail - usart_buffer_head) & USART_BUFFER_SIZE_MASK) < (USART_BUFFER_SIZE-1)) {
-        usart_buffer[usart_buffer_tail] = UDR;
-        ++usart_buffer_tail;
-        usart_buffer_tail &= USART_BUFFER_SIZE_MASK;
-    } else { // drop
-        uint8_t c = UDR;
+    uint8_t next_wr = (usart_buffer_wr + 1) & USART_BUFFER_SIZE_MASK;
+    uint8_t c = UDR;
+    if (next_wr == usart_buffer_rd) /* FIFO full, drop */
         (void)c;
+    else {
+        usart_buffer[usart_buffer_wr] = UDR;
+        usart_buffer_wr = next_wr;
     }
 }
 #endif
@@ -40,24 +36,24 @@ SIGNAL(USART_RXC_vect)
 int usart_read(uint8_t *buf, int max)
 {
 #if defined(UART_RX_INTERRUPT)
-    uint8_t head, tail;
+    uint8_t rd, wr;
     uint8_t p = 0;
 
 	cli();
-    head = usart_buffer_head;
-    tail = usart_buffer_tail;
+    rd = usart_buffer_rd;
+    wr = usart_buffer_wr;
     sei();
 
-    while (head != tail && p < max) {
-        buf[p] = usart_buffer[head];
+    while (rd != wq && p < max) {
+        buf[p] = usart_buffer[rd];
         ++p;
 
-        ++head;
-        head &= USART_BUFFER_SIZE_MASK;
+        ++rd;
+        rd &= USART_BUFFER_SIZE_MASK;
     }
 
     cli();
-    usart_buffer_head = head;
+    usart_buffer_rd = rd;
     sei();
 
     return p;
@@ -74,7 +70,7 @@ int usart_read(uint8_t *buf, int max)
 int usart_bytes_available(void)
 {
 #if defined(UART_RX_INTERRUPT)
-	return (usart_buffer_tail - usart_buffer_head) & USART_BUFFER_SIZE_MASK;
+	return (usart_buffer_wr - usart_buffer_rd) & USART_BUFFER_SIZE_MASK;
 #else
 	return (UCSRA & (1<<RXC))?1:0;
 #endif
