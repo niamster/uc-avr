@@ -44,7 +44,7 @@ int usart_read(uint8_t *buf, int max)
     wr = usart_buffer_wr;
     sei();
 
-    while (rd != wq && p < max) {
+    while (rd != wr && p < max) {
         buf[p] = usart_buffer[rd];
         ++p;
 
